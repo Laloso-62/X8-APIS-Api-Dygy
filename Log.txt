@@ -1,0 +1,119 @@
+01/12/2023 10:40:33   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     38433.4150
+01/12/2023 10:40:33   ******** en APi_DYGY ya conectado a servidor de bd     38433.9410
+01/12/2023 10:44:47   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     38687.6090
+01/12/2023 10:44:48   ******** en APi_DYGY ya conectado a servidor de bd     38688.1570
+01/12/2023 10:46:13   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     38773.1170
+01/12/2023 10:46:13   ******** en APi_DYGY ya conectado a servidor de bd     38773.6470
+01/12/2023 10:49:25   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     38965.7320
+01/12/2023 10:49:26   ******** en APi_DYGY ya conectado a servidor de bd     38966.2610
+01/12/2023 10:50:01   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     39001.1870
+01/12/2023 10:50:01   ******** en APi_DYGY ya conectado a servidor de bd     39001.7380
+01/12/2023 11:22:34   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     40954.7460
+01/12/2023 11:22:35   ******** en APi_DYGY ya conectado a servidor de bd     40955.2890
+01/12/2023 11:24:17   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     41057.1110
+01/12/2023 11:24:17   ******** en APi_DYGY ya conectado a servidor de bd     41057.6430
+01/12/2023 11:30:31   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     41431.0250
+01/12/2023 11:30:31   ******** en APi_DYGY ya conectado a servidor de bd     41431.5700
+01/12/2023 11:33:41   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     41621.8360
+01/12/2023 11:33:42   ******** en APi_DYGY ya conectado a servidor de bd     41622.3640
+01/12/2023 11:37:19   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     41839.3630
+01/12/2023 11:37:19   ******** en APi_DYGY ya conectado a servidor de bd     41839.8910
+01/12/2023 12:01:49   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     43309.8120
+01/12/2023 12:01:50   ******** en APi_DYGY ya conectado a servidor de bd     43310.3410
+01/12/2023 12:04:07   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     43447.0790
+01/12/2023 12:04:07   ******** en APi_DYGY ya conectado a servidor de bd     43447.6090
+01/12/2023 12:10:30   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     43830.0810
+01/12/2023 12:10:30   ******** en APi_DYGY ya conectado a servidor de bd     43830.6110
+01/12/2023 12:11:32   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     43892.2180
+01/12/2023 12:11:32   ******** en APi_DYGY ya conectado a servidor de bd     43892.7440
+01/12/2023 12:23:42   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     44622.0300
+01/12/2023 12:23:42   ******** en APi_DYGY ya conectado a servidor de bd     44622.5780
+01/12/2023 12:23:57   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     44637.2400
+01/12/2023 12:23:57   ******** en APi_DYGY ya conectado a servidor de bd     44637.7710
+04/12/2023 09:32:54   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     34374.7810
+04/12/2023 09:32:55   ******** en APi_DYGY ya conectado a servidor de bd     34375.3070
+04/12/2023 17:30:22   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     63022.9990
+04/12/2023 17:30:23   ******** en APi_DYGY ya conectado a servidor de bd     63023.5600
+04/12/2023 17:32:46   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     63166.5270
+04/12/2023 17:32:47   ******** en APi_DYGY ya conectado a servidor de bd     63167.0900
+04/12/2023 17:39:43   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     63583.4650
+04/12/2023 17:39:44   ******** en APi_DYGY ya conectado a servidor de bd     63584.0270
+04/12/2023 17:47:06   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     64026.2450
+04/12/2023 17:47:06   ******** en APi_DYGY ya conectado a servidor de bd     64026.8070
+04/12/2023 17:49:47   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     64187.5600
+04/12/2023 17:49:48   ******** en APi_DYGY ya conectado a servidor de bd     64188.1200
+04/12/2023 17:50:57   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     64257.2140
+04/12/2023 17:50:57   ******** en APi_DYGY ya conectado a servidor de bd     64257.7760
+04/12/2023 17:57:34   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     64654.4470
+04/12/2023 17:57:35   ******** en APi_DYGY ya conectado a servidor de bd     64655.0040
+04/12/2023 18:02:09   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     64929.4180
+04/12/2023 18:02:09   ******** en APi_DYGY ya conectado a servidor de bd     64929.9840
+04/12/2023 18:05:33   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     65133.1230
+04/12/2023 18:05:33   ******** en APi_DYGY ya conectado a servidor de bd     65133.6880
+04/12/2023 18:06:51   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     65211.8740
+04/12/2023 18:06:52   ******** en APi_DYGY ya conectado a servidor de bd     65212.4350
+04/12/2023 18:08:38   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     65318.0330
+04/12/2023 18:08:38   ******** en APi_DYGY ya conectado a servidor de bd     65318.5950
+04/12/2023 19:51:52   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     71512.6060
+04/12/2023 19:51:53   ******** en APi_DYGY ya conectado a servidor de bd     71513.4830
+04/12/2023 20:05:44   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     72344.3280
+04/12/2023 20:05:45   ******** en APi_DYGY ya conectado a servidor de bd     72345.1000
+04/12/2023 20:07:28   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     72448.1280
+04/12/2023 20:07:28   ******** en APi_DYGY ya conectado a servidor de bd     72448.8880
+04/12/2023 20:12:46   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     72766.2630
+04/12/2023 20:12:47   ******** en APi_DYGY ya conectado a servidor de bd     72767.0240
+04/12/2023 20:41:25   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     74485.0000
+04/12/2023 20:41:25   ******** en APi_DYGY ya conectado a servidor de bd     74485.5570
+04/12/2023 20:41:26      ***** !-!-!-!  el sistema API-DYGY cayo en un error detectado por catch general  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+04/12/2023 20:41:26      *****          al intentar ejecutar funcion consulta_cartera_clientes_excel
+04/12/2023 20:41:26      *****          BASE: Bound error array access
+04/12/2023 20:41:26                ---- --------------------------
+04/12/2023 20:41:26                ---- GENERA_NUEVO_EXCEL_CARTERA_CLIENTES_ANALITICOS_UN_CLIENTE(2236)
+04/12/2023 20:41:26                ---- CONSULTA_CARTERA_CLIENTES_EXCEL(61)
+04/12/2023 20:41:26                ---- PRINCIPAL:FORMSHOW(279)
+04/12/2023 20:41:26                ---- PRINCIPAL:ONSHOW(0)
+04/12/2023 20:41:26                ---- TSCROLLINGWINCONTROL:SHOW(663)
+04/12/2023 20:41:26                ---- PRINCIPAL:SHOW(491)
+04/12/2023 20:41:26                ---- MAIN(35)
+04/12/2023 20:41:26                ---- --------------------------
+04/12/2023 20:41:26      *****          codigo error 1132
+04/12/2023 20:41:26      *****          modulo PRINCIPAL:ONSHOW
+04/12/2023 20:41:26      ***** !-!-!-!  -fin-
+04/12/2023 21:21:17   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     76877.9240
+04/12/2023 21:21:18   ******** en APi_DYGY ya conectado a servidor de bd     76878.4850
+04/12/2023 21:23:00   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     76980.8310
+04/12/2023 21:23:01   ******** en APi_DYGY ya conectado a servidor de bd     76981.3930
+04/12/2023 21:24:02   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     77042.1060
+04/12/2023 21:24:02   ******** en APi_DYGY ya conectado a servidor de bd     77042.6680
+04/12/2023 21:26:17   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     77177.4480
+04/12/2023 21:26:18   ******** en APi_DYGY ya conectado a servidor de bd     77178.0130
+05/12/2023 06:46:28   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     24388.8410
+05/12/2023 06:46:29   ******** en APi_DYGY ya conectado a servidor de bd     24389.5340
+05/12/2023 07:06:44   ******** en API-DYGY Inicializando funcion consulta_cartera_grupos_excel     25604.3450
+05/12/2023 07:06:44   ******** en APi_DYGY ya conectado a servidor de bd     25604.9130
+05/12/2023 07:08:06   ******** en API-DYGY Inicializando funcion consulta_cartera_grupos_excel     25686.9470
+05/12/2023 07:08:07   ******** en APi_DYGY ya conectado a servidor de bd     25687.5080
+05/12/2023 07:10:37   ******** en API-DYGY Inicializando funcion consulta_cartera_grupos_excel     25837.0080
+05/12/2023 07:10:37   ******** en APi_DYGY ya conectado a servidor de bd     25837.5700
+05/12/2023 07:12:30   ******** en API-DYGY Inicializando funcion consulta_cartera_grupos_excel     25950.3080
+05/12/2023 07:12:30   ******** en APi_DYGY ya conectado a servidor de bd     25950.8760
+05/12/2023 07:39:15   ******** en API-DYGY Inicializando funcion consulta_cartera_grupos_excel     27555.6720
+05/12/2023 07:39:16   ******** en APi_DYGY ya conectado a servidor de bd     27556.2370
+05/12/2023 07:43:39   ******** en API-DYGY Inicializando funcion consulta_cartera_grupos_excel     27819.7750
+05/12/2023 07:43:40   ******** en APi_DYGY ya conectado a servidor de bd     27820.3410
+05/12/2023 07:45:36   ******** en API-DYGY Inicializando funcion consulta_cartera_grupos_excel     27936.3580
+05/12/2023 07:45:36   ******** en APi_DYGY ya conectado a servidor de bd     27936.9210
+05/12/2023 07:52:24   ******** en API-DYGY Inicializando funcion consulta_cartera_grupos_excel     28344.6490
+05/12/2023 07:52:25   ******** en APi_DYGY ya conectado a servidor de bd     28345.2130
+05/12/2023 07:55:07   ******** en API-DYGY Inicializando funcion consulta_cartera_grupos_excel     28507.9670
+05/12/2023 07:55:08   ******** en APi_DYGY ya conectado a servidor de bd     28508.5290
+06/12/2023 19:09:13   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     68953.0510
+06/12/2023 19:09:13   ******** en APi_DYGY ya conectado a servidor de bd     68953.5840
+06/12/2023 19:10:51   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     69051.8260
+06/12/2023 19:10:52   ******** en APi_DYGY ya conectado a servidor de bd     69052.3500
+06/12/2023 19:13:15   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     69195.8910
+06/12/2023 19:13:16   ******** en APi_DYGY ya conectado a servidor de bd     69196.4160
+06/12/2023 19:14:06   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     69246.9650
+06/12/2023 19:14:07   ******** en APi_DYGY ya conectado a servidor de bd     69247.4910
+06/12/2023 19:16:34   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     69394.3000
+06/12/2023 19:16:34   ******** en APi_DYGY ya conectado a servidor de bd     69394.8240

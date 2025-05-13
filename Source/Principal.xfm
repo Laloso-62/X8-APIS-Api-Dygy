@@ -1,0 +1,13 @@
+METHOD CreateForm( lCreate ) CLASS principal
+
+   IF lCreate
+      ::SetBounds( 474, 287, 450, 300 )
+      ::SetClientSize( 434, 262 )
+      ::cText := "rincipal"
+      ::OnInitialize := "FormInitialize"
+      ::OnShow := "FormShow"
+      ::Create()
+   ENDIF
+   ::Super:CreateForm( .F. )
+
+RETURN Self

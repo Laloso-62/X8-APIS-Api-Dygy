@@ -1,0 +1,2220 @@
+/*
+ * Proyecto: Api-Contadores
+ * Fichero: Xml_To_Xlsx.prg
+ * Descripcion:
+ * Autor:
+ * Fecha: 23/11/2023
+ */
+
+#include "Xailer.ch"
+#include "Digio.ch"
+
+//------------------------------------------------------------------------------
+
+CLASS tExcelFromXlm FROM tComponent
+
+   PROPERTY cNombreDocumento  INIT ""
+   PROPERTY cDisco            INIT ""
+   PROPERTY cRuta             INIT ""
+   PROPERTY lAbortado         INIT .f.
+   PROPERTY lBorraXmls        INIT .t.
+   PROPERTY lRastrea          INIT .f.
+   PROPERTY aHojas            INIT {}
+   PROPERTY aFuentes          INIT {}
+   PROPERTY aFills            INIT {}
+   PROPERTY aFormatos         INIT {}
+   PROPERTY aAliVertical      INIT {}
+   PROPERTY aAliHorizontal    INIT {}
+   PROPERTY aEstilos          INIT {}
+   PROPERTY aEstilosLibres    INIT {}
+   PROPERTY hContentTypes     INIT {=>}
+   PROPERTY hRels             INIT {=>}
+   PROPERTY hApp              INIT {=>}
+   PROPERTY hCore             INIT {=>}
+   PROPERTY hStyles           INIT {=>}
+   PROPERTY hWorkBook         INIT {=>}
+   PROPERTY hWoBoRels         INIT {=>}
+
+   METHOD Create()
+   METHOD GeneraCarpetas()
+   METHOD RevisaHojas()
+   METHOD RegistraEstilo(oEstilo)
+   METHOD LimpiaCadena(cCaadena)
+   METHOD RastreaCadena(cCaadena)
+   METHOD AgregaEstiloLibre(hparams)
+   METHOD GeneraContentTypes()
+   METHOD GeneraRels()
+   METHOD GeneraApp()
+   METHOD GeneraCore()
+   METHOD GeneraStyles()
+   METHOD GeneraWorkBook()
+   METHOD GeneraWoBoRels()
+   METHOD GeneraHojas()
+   METHOD GeneraZip()
+   METHOD GeneraExcel()
+   METHOD BorraXmls()
+   METHOD LimpiaDirectorio(cruta)
+
+ENDCLASS
+
+//------------------------------------------------------------------------------
+
+METHOD Create CLASS tExcelFromXlm
+
+   LOCAL cHtml
+   LOCAL hitem:={=>}
+
+   ::Super:Create()
+
+RETURN self
+
+//------------------------------------------------------------------------------
+
+CLASS tExcelHoja FROM tComponent
+
+   PROPERTY cNombre                   INIT ""
+
+   PROPERTY lPautado                  INIT .t.
+   PROPERTY cColorFondoAlterno1       INIT "FFFFFFFF"
+   PROPERTY cColorFondoAlterno2       INIT "FFFFFFFF"
+   PROPERTY cColorFondoAlterno1       INIT "FFFFFFFF"
+   PROPERTY cColorFondoAlterno2       INIT "FFFFFFFF"
+
+   PROPERTY oEstiloEncabezados        INIT nil
+
+   PROPERTY lInmoviliza               INIT .t.
+   PROPERTY lAutoFiltro               INIT .t.
+   PROPERTY lAbortado                 INIT .f.
+
+   PROPERTY aColumnas                 INIT {}
+   PROPERTY aTitulos                  INIT {}
+   PROPERTY aDatos                    INIT {}
+
+   PROPERTY cName                     INIT "nada"
+   PROPERTY cNameZip                  INIT "nadaz"
+   PROPERTY cContenido                INIT ""
+
+   METHOD Create()
+   METHOD AgregaColumna(hparams)
+   METHOD AgregaTitulo(hparams)
+   METHOD AgregaEstiloRenglonPorColumnas(hparams)
+
+
+ENDCLASS
+
+//------------------------------------------------------------------------------
+
+METHOD Create(oParent) CLASS tExcelHoja
+
+   LOCAL hpaso:= {=>}
+
+   UPDATE ::oParent TO oParent
+
+   ::Super:Create()
+
+RETURN self
+
+//------------------------------------------------------------------------------
+
+CLASS tHojaColumna FROM tComponent
+
+   PROPERTY cTitulo              INIT ""
+   PROPERTY cNombreHash          INIT ""
+   PROPERTY cLetra               INIT "A"
+
+   PROPERTY oEstiloColumna       INIT nil
+   PROPERTY oEstiloEncabezado    INIT nil
+   PROPERTY oEstiloAlterno1      INIT nil
+   PROPERTY oEstiloAlterno2      INIT nil
+
+   PROPERTY aEstilosCustomizados INIT {}
+
+   PROPERTY nAncho               INIT 12
+
+
+   METHOD Create()
+
+ENDCLASS
+
+//------------------------------------------------------------------------------
+
+METHOD Create CLASS tHojaColumna
+
+   LOCAL hpaso:= {=>}
+
+   ::Super:Create()
+
+RETURN self
+
+//------------------------------------------------------------------------------
+
+CLASS tHojaTitulo FROM tComponent
+
+   PROPERTY cTexto              INIT ""
+
+   PROPERTY oEstiloTitulo       INIT nil
+   PROPERTY oEstiloRenglonAbajo INIT nil
+
+   PROPERTY nStyleIdAbajo       INIT 0
+   PROPERTY lBrincaRenglon      INIT .t.
+
+   METHOD Create()
+
+ENDCLASS
+
+//------------------------------------------------------------------------------
+
+METHOD Create CLASS tHojaTitulo
+
+   LOCAL hpaso:= {=>}
+
+   ::Super:Create()
+
+RETURN self
+
+//------------------------------------------------------------------------------
+
+CLASS tEstiloExcel FROM tComponent
+
+   PROPERTY cNombreFuente     INIT "Calibri Light"
+   PROPERTY cColorFondo       INIT "none"
+   PROPERTY cColorFuente      INIT "FF000000"
+   PROPERTY cAliVertical      INIT "center"
+   PROPERTY cAliHorizontal    INIT "left"
+   PROPERTY cFormatoEspecial  INIT ""
+
+   PROPERTY nFuente           INIT 12
+   PROPERTY nStyleId          INIT 0
+
+   PROPERTY nFontId           INIT 0
+   PROPERTY nBorderId         INIT 0
+   PROPERTY nFillId           INIT 0
+   PROPERTY nFmtId            INIT 0
+   PROPERTY nAliVerticalId    INIT 0
+   PROPERTY nAliHorizontalId  INIT 0
+
+   PROPERTY lNegrita          INIT .f.
+   PROPERTY lWrap             INIT .f.
+
+   PROPERTY oBorde            INIT nil
+
+   METHOD Create()
+
+ENDCLASS
+
+//------------------------------------------------------------------------------
+
+METHOD Create CLASS tEstiloExcel
+
+   LOCAL hpaso:= {=>}
+
+   ::Super:Create()
+
+RETURN self
+
+//--------------------------------------------------------------------------
+
+METHOD AgregaColumna(hparams) CLASS tExcelHoja
+
+   LOCAL hpaso:= {=>}, oColumna, oEstilo, oHoja, ualgo
+
+   oHoja:= Self
+
+   with object oColumna := tHojaColumna():new
+      :cTitulo        := iif(hb_HHasKey(hparams, "cTitulo")         , hparams["cTitulo"]        , "")
+      :cNombreHash    := iif(hb_HHasKey(hparams, "cNombreHash")     , hparams["cNombreHash"]    , "")
+      :nAncho         := iif(hb_HHasKey(hparams, "nAncho")          , hparams["nAncho"]         , 12)
+
+      with object :oEstiloColumna := tEstiloExcel():new
+         :cNombreFuente    := iif(hb_HHasKey(hparams, "cNombreFuente")   , hparams["cNombreFuente"]  , "Calibri Light")
+         :nFuente          := iif(hb_HHasKey(hparams, "nFuente")         , hparams["nFuente"]        , 12)
+         :cFormatoEspecial := iif(hb_HHasKey(hparams, "cFormato")        , hparams["cFormato"]       , "")
+         :cColorFondo      := iif(hb_HHasKey(hparams, "cColorFondo")     , hparams["cColorFondo"]    , "")
+         :cColorFuente     := iif(hb_HHasKey(hparams, "cColorFuente")    , hparams["cColorFuente"]   , "FF000000")
+         :cAliVertical     := iif(hb_HHasKey(hparams, "cAliVertical")    , hparams["cAliVertical"]   , "center")
+         :cAliHorizontal   := iif(hb_HHasKey(hparams, "cAliHorizontal")  , hparams["cAliHorizontal"] , "")
+         :lNegrita         := iif(hb_HHasKey(hparams, "lNegrita")        , hparams["lNegrita"]       , .f.)
+         :lWrap            := iif(hb_HHasKey(hparams, "lWrap")           , hparams["lWrap"]          , .f.)
+
+         :Create()
+
+      END
+
+      with object :oEstiloEncabezado := tEstiloExcel():new
+
+         :Create()
+
+      END
+
+      with object :oEstiloAlterno1 := tEstiloExcel():new
+
+         :Create()
+
+      END
+
+      with object :oEstiloAlterno2 := tEstiloExcel():new
+
+         :Create()
+
+      END
+
+
+      :Create()
+
+   END
+
+   oColumna:oEstiloEncabezado:cNombreFuente    := oColumna:oEstiloColumna:cNombreFuente
+   oColumna:oEstiloEncabezado:nFuente          := oColumna:oEstiloColumna:nFuente
+   oColumna:oEstiloEncabezado:cFormatoEspecial := ""
+
+   ualgo:=oColumna:oEstiloEncabezado:cColorFondo
+   ualgo:=::oEstiloEncabezados:cColorFondo
+
+   oColumna:oEstiloEncabezado:cColorFondo      := ::oEstiloEncabezados:cColorFondo
+   oColumna:oEstiloEncabezado:cColorFuente     := ::oEstiloEncabezados:cColorFuente
+   oColumna:oEstiloEncabezado:cAliVertical     := oColumna:oEstiloColumna:cAliVertical
+   oColumna:oEstiloEncabezado:cAliHorizontal   := oColumna:oEstiloColumna:cAliHorizontal
+   oColumna:oEstiloEncabezado:lNegrita         := ::oEstiloEncabezados:lNegrita
+   oColumna:oEstiloEncabezado:lWrap            := ::oEstiloEncabezados:lWrap
+
+   if ::lPautado
+
+      oColumna:oEstiloAlterno1:cNombreFuente    := oColumna:oEstiloColumna:cNombreFuente
+      oColumna:oEstiloAlterno1:nFuente          := oColumna:oEstiloColumna:nFuente
+      oColumna:oEstiloAlterno1:cFormatoEspecial := oColumna:oEstiloColumna:cFormatoEspecial
+      oColumna:oEstiloAlterno1:cColorFondo      := ::cColorFondoAlterno1
+      oColumna:oEstiloAlterno1:cColorFuente     := oColumna:oEstiloColumna:cColorFuente
+      oColumna:oEstiloAlterno1:cAliVertical     := oColumna:oEstiloColumna:cAliVertical
+      oColumna:oEstiloAlterno1:cAliHorizontal   := oColumna:oEstiloColumna:cAliHorizontal
+      oColumna:oEstiloAlterno1:lNegrita         := oColumna:oEstiloColumna:lNegrita
+      oColumna:oEstiloAlterno1:lWrap            := oColumna:oEstiloColumna:lWrap
+
+      oColumna:oEstiloAlterno2:cNombreFuente    := oColumna:oEstiloColumna:cNombreFuente
+      oColumna:oEstiloAlterno2:nFuente          := oColumna:oEstiloColumna:nFuente
+      oColumna:oEstiloAlterno2:cFormatoEspecial := oColumna:oEstiloColumna:cFormatoEspecial
+      oColumna:oEstiloAlterno2:cColorFondo      := ::cColorFondoAlterno2
+      oColumna:oEstiloAlterno2:cColorFuente     := oColumna:oEstiloColumna:cColorFuente
+      oColumna:oEstiloAlterno2:cAliVertical     := oColumna:oEstiloColumna:cAliVertical
+      oColumna:oEstiloAlterno2:cAliHorizontal   := oColumna:oEstiloColumna:cAliHorizontal
+      oColumna:oEstiloAlterno2:lNegrita         := oColumna:oEstiloColumna:lNegrita
+      oColumna:oEstiloAlterno2:lWrap            := oColumna:oEstiloColumna:lWrap
+
+   endif
+
+   oHoja:= Self
+
+
+   AAdd(::aColumnas, oColumna)
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD AgregaTitulo(hparams) CLASS tExcelHoja
+
+   LOCAL hpaso:= {=>}, oTitulo, oestilo, oestiloAbajo
+
+   with object oestilo := tEstiloExcel():new
+      :cNombreFuente    := iif(hb_HHasKey(hparams, "cNombreFuente")     , hparams["cNombreFuente"]    , "Calibri Light")
+      :cAliVertical     := iif(hb_HHasKey(hparams, "cAliVertical")      , hparams["cAliVertical"]     , "center")
+      :cAliHorizontal   := iif(hb_HHasKey(hparams, "cAliHorizontal")    , hparams["cAliHorizontal"]   , "left")
+      :nFuente          := iif(hb_HHasKey(hparams, "nFuente")           , hparams["nFuente"]          , 24)
+      :lNegrita         := iif(hb_HHasKey(hparams, "lNegrita")          , hparams["lNegrita"]         , .f.)
+      :cColorFondo      := iif(hb_HHasKey(hparams, "cColorFondo")       , hparams["cColorFondo"]      , "FFFFFFFF")
+      :cColorFuente     := iif(hb_HHasKey(hparams, "cColorFuente")      , hparams["cColorFuente"]     , "FF000000")
+
+      :Create()
+
+   END
+
+   with object oestiloAbajo := tEstiloExcel():new
+      :cColorFondo      := iif(hb_HHasKey(hparams, "cColorFondoAbajo")  , hparams["cColorFondoAbajo"] , "FFFFFFFF")
+
+      :Create()
+
+   END
+
+   with object oTitulo := tHojaTitulo():new
+      :cTexto              := iif(hb_HHasKey(hparams, "cTexto")            , hparams["cTexto"]           , "")
+      :lBrincaRenglon      := iif(hb_HHasKey(hparams, "lBrincaRenglon")    , hparams["lBrincaRenglon"]   , .t.)
+      :oEstiloTitulo       := oestilo
+      :oEstiloRenglonAbajo := oestiloAbajo
+
+      :Create()
+
+   END
+
+   AAdd(::aTitulos, oTitulo)
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD AgregaEstiloRenglonPorColumnas(hparams) CLASS tExcelHoja
+
+   LOCAL oColumna, oEstiloColumna, ualgo
+
+   for each oColumna in ::aColumnas
+
+      with object oEstiloColumna := tEstiloExcel():new
+         :cNombreFuente    := iif(hb_HHasKey(hparams, "cNombreFuente")   , hparams["cNombreFuente"]  ,  oColumna:oEstiloColumna:cNombreFuente)
+         :nFuente          := iif(hb_HHasKey(hparams, "nFuente")         , hparams["nFuente"]        ,  oColumna:oEstiloColumna:nFuente)
+         :cFormatoEspecial := iif(hb_HHasKey(hparams, "cFormato")        , hparams["cFormato"]       ,  oColumna:oEstiloColumna:cFormatoEspecial)
+         :cColorFondo      := iif(hb_HHasKey(hparams, "cColorFondo")     , hparams["cColorFondo"]    ,  oColumna:oEstiloColumna:cColorFondo)
+         :cColorFuente     := iif(hb_HHasKey(hparams, "cColorFuente")    , hparams["cColorFuente"]   ,  oColumna:oEstiloColumna:cColorFuente)
+         :cAliVertical     := iif(hb_HHasKey(hparams, "cAliVertical")    , hparams["cAliVertical"]   ,  oColumna:oEstiloColumna:cAliVertical)
+         :cAliHorizontal   := iif(hb_HHasKey(hparams, "cAliHorizontal")  , hparams["cAliHorizontal"] ,  oColumna:oEstiloColumna:cAliHorizontal)
+         :lNegrita         := iif(hb_HHasKey(hparams, "lNegrita")        , hparams["lNegrita"]       ,  oColumna:oEstiloColumna:lNegrita)
+         :lWrap            := iif(hb_HHasKey(hparams, "lWrap")           , hparams["lWrap"]          ,  oColumna:oEstiloColumna:lWrap)
+
+         :Create()
+
+      END
+
+      AAdd(oColumna:aEstilosCustomizados , oEstiloColumna)
+
+   next
+
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD AgregaEstiloLibre(hparams) CLASS tExcelFromXlm
+
+   LOCAL oEstilo
+
+   with object oEstilo := tEstiloExcel():new
+      :cNombreFuente    := iif(hb_HHasKey(hparams, "cNombreFuente")   , hparams["cNombreFuente"]  , "Calibri Light")
+      :nFuente          := iif(hb_HHasKey(hparams, "nFuente")         , hparams["nFuente"]        , 12)
+      :cFormatoEspecial := iif(hb_HHasKey(hparams, "cFormato")        , hparams["cFormato"]       , "")
+      :cColorFondo      := iif(hb_HHasKey(hparams, "cColorFondo")     , hparams["cColorFondo"]    , "")
+      :cColorFuente     := iif(hb_HHasKey(hparams, "cColorFuente")    , hparams["cColorFuente"]   , "FF000000")
+      :cAliVertical     := iif(hb_HHasKey(hparams, "cAliVertical")    , hparams["cAliVertical"]   , "center")
+      :cAliHorizontal   := iif(hb_HHasKey(hparams, "cAliHorizontal")  , hparams["cAliHorizontal"] , "")
+      :lNegrita         := iif(hb_HHasKey(hparams, "lNegrita")        , hparams["lNegrita"]       , .f.)
+      :lWrap            := iif(hb_HHasKey(hparams, "lWrap")           , hparams["lWrap"]          , .f.)
+
+      :Create()
+
+   END
+
+   AAdd(::aEstilosLibres , oEstilo)
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD RegistraEstilo(oEstilo) CLASS tExcelFromXlm
+
+   LOCAL hpaso:= {=>}
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * ASIGNAMOS LA VARIABLE SELF A UNA VARIABLE LOCAL SOLO PARA MONITOREOS
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   hpaso["cHoja"] := Self
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * REGISTRAMOS FUENTE Y OBTENEMOS SU ID
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   oEstilo:nFontId := HB_Ascan( ::afuentes, {|x| x["nFuente"] == oEstilo:nFuente .and. x["cNombreFuente"] == oEstilo:cNombreFuente .and. x["cColorFuente"] == oEstilo:cColorFuente .and. x["lNegrita"] == oEstilo:lNegrita} )
+
+   if oEstilo:nFontId = 0
+
+      AAdd(::afuentes, {"nFuente" => oEstilo:nFuente, "cNombreFuente" => oEstilo:cNombreFuente, "cColorFuente" => oEstilo:cColorFuente, "lNegrita" => oEstilo:lNegrita})
+      oEstilo:nFontId := Len(::aFuentes)
+
+   endif
+
+   oEstilo:nFontId := IIF(oEstilo:nFontId >0 , oEstilo:nFontId -1 , oEstilo:nFontId)
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * REGISTRAMOS RELLENO (FILL) Y OBTENEMOS SU ID
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   if Len(oEstilo:cColorFondo) > 0
+
+      oEstilo:nFillId := HB_Ascan( ::aFills, {|x| x["cFill"] == oEstilo:cColorFondo} )
+
+      if oEstilo:nFillId = 0
+
+         AAdd(::aFills, {"cFill" => oEstilo:cColorFondo})
+         oEstilo:nFillId:= Len(::aFills)
+
+      endif
+
+   endif
+
+   oEstilo:nFillId:= IIF( oEstilo:nFillId > 0 , oEstilo:nFillId -1 , oEstilo:nFillId)
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * REGISTRAMOS FORMATO ESPECIAL Y OBTENEMOS SU ID
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   if Len(oEstilo:cFormatoEspecial) > 0
+
+      oEstilo:nFmtId:= HB_Ascan( ::aformatos, {|x| x["cFormato"] == oEstilo:cFormatoEspecial} )
+
+      if oEstilo:nFmtId = 0
+
+         AAdd(::aFormatos, {"cFormato" => oEstilo:cFormatoEspecial , "id_formato" => Len(::aformatos) + 161  })
+         oEstilo:nFmtId:= ::aFormatos[Len(::aFormatos), "id_formato"]
+
+         else
+
+         oEstilo:nFmtId:= ::aFormatos[oEstilo:nFmtId, "id_formato"]
+
+      endif
+
+   endif
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * REGISTRAMOS ALINEACION VERTICAL Y OBTENEMOS SU ID
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   if Len(oEstilo:cAliVertical) > 0
+
+      oEstilo:nAliVerticalId:= HB_Ascan( ::aAliVertical, {|x| x["cAliVertical"] == oEstilo:cAliVertical} )
+
+      if oEstilo:nAliVerticalId = 0
+
+         AAdd(::aAliVertical, {"cAliVertical" => oEstilo:cAliVertical})
+         oEstilo:nAliVerticalId:= Len(::aAliVertical)
+
+      endif
+
+   endif
+
+   *oEstilo:nAliVerticalId:= IIF(oEstilo:nAliVerticalId = 0 , oEstilo:nAliVerticalId -1 , oEstilo:nAliVerticalId)
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * REGISTRAMOS ALINEACION HORIZONTAL Y OBTENEMOS SU ID
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   if Len(oEstilo:cAliHorizontal) > 0
+
+      oEstilo:nAliHorizontalId:= HB_Ascan( ::aAliHorizontal, {|x| x["cAliHorizontal"] == oEstilo:cAliHorizontal} )
+
+      if oEstilo:nAliHorizontalId = 0
+
+         AAdd(::aAliHorizontal, {"cAliHorizontal" => oEstilo:cAliHorizontal})
+         oEstilo:nAliHorizontalId:= Len(::aAliHorizontal)
+
+      endif
+
+   endif
+
+   *oEstilo:nAliHorizontalId:= IIF(oEstilo:nAliHorizontalId > 0 , oEstilo:nAliHorizontalId-1 , oEstilo:nAliHorizontalId)
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * VALIDAMOS QUE NO EXISTA LA COOMBINACION DE ID'S EN AESTILOS
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   oEstilo:nStyleId:=HB_Ascan( ::aEstilos, {|x| x["nFontId"]          == oEstilo:nFontId .and.              ;
+                                                x["nFillId"]          == oEstilo:nFillId .and.              ;
+                                                x["nNumFmtId"]        == oEstilo:nFmtId .and.               ;
+                                                x["nAliVerticalId"]   == oEstilo:nAliVerticalId .and.       ;
+                                                x["nAliHorizontalId"] == oEstilo:nAliHorizontalId .and.     ;
+                                                x["lNegrita"]         == oEstilo:lNegrita .and.             ;
+                                                x["lWrap"]            == oEstilo:lWrap} )
+
+   if oEstilo:nStyleId = 0
+
+      AAdd(::aestilos, {"nFontId"          => oEstilo:nFontId ,                       ;
+                        "nFillId"          => oEstilo:nFillId ,                       ;
+                        "nNumFmtId"        => oEstilo:nFmtId ,                        ;
+                        "nAliVerticalId"   => oEstilo:nAliVerticalId ,                ;
+                        "nAliHorizontalId" => oEstilo:nAliHorizontalId,               ;
+                        "lNegrita"         => oEstilo:lNegrita,                       ;
+                        "lWrap"            => oEstilo:lWrap,                          ;
+                        "cXmlStyle"        => ""} )
+
+      oEstilo:nStyleId:= Len(::aEstilos)
+
+      ::aEstilos[oEstilo:nStyleId,"cXmlStyle"]:= '      <xf borderId="0" fillId="' + ToString(oEstilo:nFillId) +'" fontId="' + ToString(oEstilo:nFontId) + '" numFmtId="' + ToString(oEstilo:nFmtId) + '" xfId="0"'
+
+      * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      * APLICACION DE VALORES APPLY
+      * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+      ::aEstilos[oEstilo:nStyleId,"cXmlStyle"]:= IIF(oEstilo:nAliVerticalId <> 0 .or.                          ;
+                                             oEstilo:nAliHorizontalId <> 0 .or.                        ;
+                                             oEstilo:lWrap,                                            ;
+                                             ::aEstilos[oEstilo:nStyleId,"cXmlStyle"] + ' applyAlignment="1"'    , ::aEstilos[oEstilo:nStyleId,"cXmlStyle"])
+
+
+      ::aEstilos[oEstilo:nStyleId,"cXmlStyle"]:= IIF(oEstilo:nBorderId <> 0        , ::aEstilos[oEstilo:nStyleId,"cXmlStyle"] + ' applyBorder="1"'       , ::aEstilos[oEstilo:nStyleId,"cXmlStyle"])
+      ::aEstilos[oEstilo:nStyleId,"cXmlStyle"]:= IIF(oEstilo:nFillId <> 0          , ::aEstilos[oEstilo:nStyleId,"cXmlStyle"] + ' applyFill="1"'         , ::aEstilos[oEstilo:nStyleId,"cXmlStyle"])
+      ::aEstilos[oEstilo:nStyleId,"cXmlStyle"]:= IIF(oEstilo:nFontId <> 0          , ::aEstilos[oEstilo:nStyleId,"cXmlStyle"] + ' applyFont="1"'         , ::aEstilos[oEstilo:nStyleId,"cXmlStyle"])
+      ::aEstilos[oEstilo:nStyleId,"cXmlStyle"]:= IIF(oEstilo:nFmtId <> 0           , ::aEstilos[oEstilo:nStyleId,"cXmlStyle"] + ' applyNumberFormat="1"' , ::aEstilos[oEstilo:nStyleId,"cXmlStyle"])
+
+      if oEstilo:nAliVerticalId <> 0 .or. oEstilo:nAliHorizontalId <> 0 .or. oEstilo:lWrap
+
+         ::aEstilos[oEstilo:nStyleId,"cXmlStyle"]+= '>' + crlf
+
+         ::aEstilos[oEstilo:nStyleId,"cXmlStyle"]+= '         <alignment'
+
+         if oEstilo:nAliVerticalId <> 0
+            ::aEstilos[oEstilo:nStyleId,"cXmlStyle"] += ' vertical="' + ::aAliVertical[oEstilo:nAliVerticalId,"cAliVertical"] + '"'
+         endif
+
+         if oEstilo:nAliHorizontalId <> 0
+            ::aEstilos[oEstilo:nStyleId,"cXmlStyle"] +=' horizontal="' + ::aAliHorizontal[oEstilo:nAliHorizontalId,"cAliHorizontal"] + '"'
+         endif
+
+         if oEstilo:lWrap
+            ::aEstilos[oEstilo:nStyleId,"cXmlStyle"]+= ' wrapText="1"'
+         endif
+
+         ::aEstilos[oEstilo:nStyleId,"cXmlStyle"]+= ' />' + crlf
+         ::aEstilos[oEstilo:nStyleId,"cXmlStyle"]+= '      </xf>' + crlf
+
+         else
+
+         ::aEstilos[oEstilo:nStyleId,"cXmlStyle"]+= ' />' + crlf
+
+      endif
+
+   endif
+
+   oEstilo:nStyleId:= IIF(oEstilo:nStyleId > 0 , oEstilo:nStyleId - 1 , 0)
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD LimpiaCadena(cCadena) CLASS tExcelFromXlm
+
+   LOCAL cpaso, neste
+
+   if ::lRastrea
+      ::RastreaCadena(cCadena)
+   endif
+
+   cCadena:=StrTran(cCadena, "&" , "&amp;")
+   cCadena:=StrTran(cCadena, crlf , "")
+   cCadena:=StrTran(cCadena, Chr(160) , "")
+   cCadena:=StrTran(cCadena, Chr(194) , "")
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD RastreaCadena(cCadena) CLASS tExcelFromXlm
+
+   LOCAL cpaso:= "", neste
+
+   AppData:oFileLog:GrabaUnMensajeEnLog("  ---- rastreando cadena = " + cCadena)
+
+   for neste:=1 to Len(cCadena)
+
+      cpaso:= subs(cCadena, neste, 1)
+
+      AppData:oFileLog:GrabaUnMensajeEnLog("    -- en posicion " + ToString(neste) + "caracter = " + cpaso + " asc de caracter = " + tostring(asc(cpaso)))
+
+   next
+
+   AppData:oFileLog:GrabaUnMensajeEnLog("  ---- fin de rastreo")
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD GeneraCarpetas() CLASS tExcelFromXlm
+
+   LOCAL hpaso:= {=>}
+   LOCAL nresultado:= 0
+
+   * ==============================================================================================================================================================================
+   * GUARDAMOS LA RUTA QUE TIENE LA APLICACION ANTES DE LA GENERACION DEL ARCHIVO EXCEL
+   * ==============================================================================================================================================================================
+
+   hpaso["cruta_previa"]:= DiskName() + ":\" + CurDir()
+
+   * ==============================================================================================================================================================================
+   * INTENTO DE CAMBIAR DE DISCO Y DIRECTORIO
+   * ==============================================================================================================================================================================
+
+   nresultado:= dirchange(::cRuta)
+
+   * ==============================================================================================================================================================================
+   * SI EL INTENTO NO FUE EXITOSO, ABORTAMOS EL PROCESO
+   * ==============================================================================================================================================================================
+
+   if nresultado <> 0
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  ++ error en GeneraCarpetas() de clase tExcelFromXlm al intentar cambiar ruta a: " + ::cRuta                             , ;
+                                           "  ++ nresultado = " + ToString(nresultado)                                                                                , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      ::lAbortado:= .t.
+
+      return(nil)
+
+   endif
+
+   * ==============================================================================================================================================================================
+   * INICIAREMOS CREANDO LA ESTRUCTURA DE CARPETAS Y SUBCARPETAS, LA ESTRUCTURA BASE QUEDARIA DE ESTA MANERA
+   * ==============================================================================================================================================================================
+   * - ROOT                - LA CARPETA ROOT LA CREAREMOS CON EL MISMO NOMBRE QUE LLEVARA EL DOCUMENTO EXCEL, CON ESTO SERA FACIL IDENTIFICAR CADA CREACION SOLICITADA
+   *                       - EN ESTA CARPETA SE UBICARA EL ARCHIVO |[CONTENT.TYPES].XML|
+   *   - _RELS             -   EN ESTA CARPETA SE UBICARA EL ARCHIVO |.RELS|
+   *   - DOCPROPS          -   EN ESTA CARPETA SE UBICARAN LOS ARCHIVOS |APP.XML| Y |CORE.XML|
+   *   - XL                -   EN ESTA CARPETA SE UBICARAN LOS ARCHIVOS ||STYLES.XML|| Y ||WORKBOOK.XML||
+   *     - _RELS           -      EN ESTA CARPETA SE UBICARA EL ARCHIVO ||WORKBOOK.XML.RELS||
+   *     - WORKSHEETS      -      EN ESTA CARPETA SE UBICARAN LOS ARCHIVOS ||SHEET1.XML||, ||SHEET2.XML||, ||SHEET3.XML||, ...||SHEETN.XML||
+   * ==============================================================================================================================================================================
+
+   * ==============================================================================================================================================================================
+   * CREAMOS UNA CARPETA USANDO EL MISMO NOMBRE DEL ARCHIVO EXCEL QUE GENERAREMOS
+   * ==============================================================================================================================================================================
+
+   nresultado:= makedir(::cNombreDocumento + "_X")
+
+   * ==============================================================================================================================================================================
+   * SI EL INTENTO NO FUE EXITOSO, ABORTAMOS EL PROCESO, PERO SI TENEMOS EL ERROR 5 DEJAMOS SEGUIR EL FLUJO DE LA CREACION
+   * ==============================================================================================================================================================================
+
+   if nresultado <> 0 .and. nresultado <> 5
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  ++ error en GeneraCarpetas() de clase tExcelFromXlm al intentar crear carpeta contenedora de archivos xmls"             , ;
+                                           "  ++ nresultado = " + ToString(nresultado)                                                                                , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      ::lAbortado:= .t.
+
+      return(nil)
+
+   endif
+
+   * ==============================================================================================================================================================================
+   * NOS CAMBIAMOS A LA CARPETA DONDE GRABAREMOS LOS ARCHIVOS QUE CONTENDRA EL ZIP (XLSX)
+   * ==============================================================================================================================================================================
+
+   nresultado:= dirchange(::cRuta + "\" + ::cNombreDocumento + "_X")
+
+   * ==============================================================================================================================================================================
+   * SI EL INTENTO NO FUE EXITOSO, ABORTAMOS EL PROCESO
+   * ==============================================================================================================================================================================
+
+   if nresultado <> 0
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  ++ error en GeneraCarpetas() de clase tExcelFromXlm al intentar posicionarse en carpeta contenedora de archivos xmls"   , ;
+                                           "  ++ nresultado = " + ToString(nresultado)                                                                                , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      ::lAbortado:= .t.
+
+      return(nil)
+
+   endif
+
+   * ==============================================================================================================================================================================
+   * CREACION DE CARPETA _RELS
+   * ==============================================================================================================================================================================
+
+   nresultado:= makedir("_rels")
+
+   * ==============================================================================================================================================================================
+   * SI EL INTENTO NO FUE EXITOSO, ABORTAMOS EL PROCESO, PERO SI TENEMOS EL ERROR 5 DEJAMOS SEGUIR EL FLUJO DE LA CREACION
+   * ==============================================================================================================================================================================
+
+   if nresultado <> 0 .and. nresultado <> 5
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  ++ error en GeneraCarpetas() de clase tExcelFromXlm al intentar crear carpeta _rels "                                   , ;
+                                           "  ++ nresultado = " + ToString(nresultado)                                                                                , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      ::lAbortado:= .t.
+
+      return(nil)
+
+   endif
+
+
+   * ==============================================================================================================================================================================
+   * CREACION DE CARPETA DOCPROPS
+   * ==============================================================================================================================================================================
+
+   nresultado:= makedir("docProps")
+
+   * ==============================================================================================================================================================================
+   * SI EL INTENTO NO FUE EXITOSO, ABORTAMOS EL PROCESO, PERO SI TENEMOS EL ERROR 5 DEJAMOS SEGUIR EL FLUJO DE LA CREACION
+   * ==============================================================================================================================================================================
+
+   if nresultado <> 0 .and. nresultado <> 5
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  ++ error en GeneraCarpetas() de clase tExcelFromXlm al intentar crear carpeta docProps"                                 , ;
+                                           "  ++ nresultado = " + ToString(nresultado)                                                                                , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      ::lAbortado:= .t.
+
+      return(nil)
+
+   endif
+
+   * ==============================================================================================================================================================================
+   * CREACION DE CARPETA XL
+   * ==============================================================================================================================================================================
+
+   nresultado:= makedir("xl")
+
+   * ==============================================================================================================================================================================
+   * SI EL INTENTO NO FUE EXITOSO, ABORTAMOS EL PROCESO, PERO SI TENEMOS EL ERROR 5 DEJAMOS SEGUIR EL FLUJO DE LA CREACION
+   * ==============================================================================================================================================================================
+
+   if nresultado <> 0 .and. nresultado <> 5
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  ++ error en GeneraCarpetas() de clase tExcelFromXlm al intentar crear carpeta xl"                                       , ;
+                                           "  ++ nresultado = " + ToString(nresultado)                                                                                , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      ::lAbortado:= .t.
+
+   endif
+
+   * ==============================================================================================================================================================================
+   * NOS CAMBIAMOS A LA CARPETA XL PARA CREAR SUBCARPETAS QUE DEBE CONTENER
+   * ==============================================================================================================================================================================
+
+   nresultado:= dirchange(::cRuta + "\" + ::cNombreDocumento + "_X" + "\XL")
+
+   * ==============================================================================================================================================================================
+   * SI EL INTENTO NO FUE EXITOSO, ABORTAMOS EL PROCESO
+   * ==============================================================================================================================================================================
+
+   if nresultado <> 0
+
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  ++ error en GeneraCarpetas() de clase tExcelFromXlm al intentar crear posicionarse en carpeta xl"                       , ;
+                                           "  ++ nresultado = " + ToString(nresultado)                                                                                , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      ::lAbortado:= .t.
+
+      return(nil)
+
+   endif
+
+   * ==============================================================================================================================================================================
+   * CREACION DE SUB-CARPETA _RELS
+   * ==============================================================================================================================================================================
+
+   nresultado:= makedir("_rels")
+
+   * ==============================================================================================================================================================================
+   * SI EL INTENTO NO FUE EXITOSO, ABORTAMOS EL PROCESO, PERO SI TENEMOS EL ERROR 5 DEJAMOS SEGUIR EL FLUJO DE LA CREACION
+   * ==============================================================================================================================================================================
+
+   if nresultado <> 0 .and. nresultado <> 5
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  ++ error en GeneraCarpetas() de clase tExcelFromXlm al intentar crear posicionarse en carpeta xl/_rels"                 , ;
+                                           "  ++ nresultado = " + ToString(nresultado)                                                                                , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      ::lAbortado:= .t.
+
+      return(nil)
+
+   endif
+
+
+   * ==============================================================================================================================================================================
+   * CREACION DE SUB-CARPETA WORKSHEETS
+   * ==============================================================================================================================================================================
+
+   nresultado:= makedir("worksheets")
+
+   * ==============================================================================================================================================================================
+   * SI EL INTENTO NO FUE EXITOSO, ABORTAMOS EL PROCESO, PERO SI TENEMOS EL ERROR 5 DEJAMOS SEGUIR EL FLUJO DE LA CREACION
+   * ==============================================================================================================================================================================
+
+   if nresultado <> 0 .and. nresultado <> 5
+
+      *---------------------------------------------
+      * AQUI LOS MENSAJES Y GRABACIONES DEL ERROR
+      *---------------------------------------------
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  ++ error en GeneraCarpetas() de clase tExcelFromXlm al intentar crear posicionarse en carpeta xl/worksheets"            , ;
+                                           "  ++ nresultado = " + ToString(nresultado)                                                                                , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      ::lAbortado:= .t.
+
+      return(nil)
+
+   endif
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD RevisaHojas() CLASS tExcelFromXlm
+
+   LOCAL hpaso:= {=>}, oHoja, oColumna
+
+   for each oHoja in ::ahojas
+
+      AppData:oFileLog:GrabaUnMensajeEnLog("++ en RevisaHojas()    oHoja:cnombre = " + oHoja:cNombre)
+
+      for each oColumna in oHoja:aColumnas
+
+         AppData:oFileLog:GrabaUnMensajeEnLog("  ++ Columna = " + oColumna:cTitulo)
+
+      next
+
+   next
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD GeneraContentTypes() CLASS tExcelFromXlm
+
+   LOCAL hHoja:= {=>}
+
+
+
+   * ==============================================================================================================================================================================
+   * DEFINIMOS EL ARCHIVO [CONTENT_TYPES].XML, ESTE DEBE QUEDAR EN RAIZ DE LA CARPETA CONTENEDORA DE XMLS
+   * ==============================================================================================================================================================================
+
+   ::hContentTypes:= {"cname"     => ::cRuta + "\" + ::cNombreDocumento  + "_X" + "\[Content_Types].xml" , "cname_zip" => "[Content_Types].xml" ,                                           ;
+                      "contenido" => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + crlf                                                                                       ;
+                                    +'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' + crlf                                                                  ;
+                                    +'   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml" />' + crlf                                        ;
+                                    +'   <Default Extension="xml" ContentType="application/xml" />' + crlf                                                                                  ;
+                                    +'   <Default Extension="vml" ContentType="application/vnd.openxmlformats-officedocument.vmlDrawing" />' + crlf                                         ;
+                                    +'   <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" />' + crlf          ;
+                                    +'   <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml" />' +crlf }
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * SECCION PARA LAS HOJAS
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   for each hHoja in ::ahojas
+
+      ::hContentTypes["contenido"] += '   <Override PartName="/xl/worksheets/sheet' + ToString(hHoja:__enumindex) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml" />' + crlf
+
+   next
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * SECCION APP.XML Y CORE.XML
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   ::hContentTypes["contenido"] += '   <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml" />' + crlf                ;
+                                  +'   <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml" />' + crlf                          ;
+                                  +'</Types>'
+
+
+
+   * ==============================================================================================================================================================================
+   * GRABAMOS ARCHIVO Y EN CASO DE ERROR GRABAMOS MENSAJES Y SEÑALES SUFICIENTES
+   * ==============================================================================================================================================================================
+
+   if !hb_memowrit(::hContentTypes["cname"], ::hContentTypes["contenido"])
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  !! error en GeneraContentTypes() de clase tExcelFromXlm al intentar grabar archivo content_types"                       , ;
+                                           "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      ::lAbortado := .t.
+
+      return(nil)
+
+   endif
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD GeneraRels() CLASS tExcelFromXlm
+
+   * ==============================================================================================================================================================================
+   * DEFINIMOS EL ARCHIVO .RELS, ESTE DEBE QUEDAR EN SUBCARPETA \_RELS DE LA CARPETA CONTENEDORA DE XMLS
+   * ==============================================================================================================================================================================
+
+   ::hRels:= {"cname"     => ::cRuta + "\" + ::cNombreDocumento + "_X" + "\_rels\.rels" ,  "cname_zip" => "_rels\.rels" ,                                                                           ;
+              "contenido" => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + crlf                                                                                                       ;
+                            +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + crlf                                                                          ;
+                            +'    <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml" />' + crlf       ;
+                            +'    <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml" />' + crlf        ;
+                            +'    <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml" />' + crlf             ;
+                            +'</Relationships>' }
+
+   * ==============================================================================================================================================================================
+   * GRABAMOS ARCHIVO Y EN CASO DE ERROR GRABAMOS MENSAJES Y SEÑALES SUFICIENTES
+   * ==============================================================================================================================================================================
+
+   if !hb_memowrit(::hRels["cname"], ::hRels["contenido"])
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  !! error en GeneraRels()  de clase tExcelFromXlm al intentar grabar archivo .rels"                                      , ;
+                                           "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      ::lAbortado := .t.
+
+      return(nil)
+
+   endif
+
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD GeneraApp() CLASS tExcelFromXlm
+
+   * ==============================================================================================================================================================================
+   * DEFINIMOS EL ARCHIVO APP.XML, ESTE DEBE QUEDAR EN SUBCARPETA \DOCPROPS DE LA CARPETA CONTENEDORA DE XMLS
+   * ==============================================================================================================================================================================
+
+   ::hApp:= {"cname"     => ::cRuta + "\" + ::cNombreDocumento + "_X" + "\docProps\app.xml" , "cname_zip" => "docProps\app.xml" ,                                                                                     ;
+             "contenido" => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + crlf                                                                                                                          ;
+                           +'<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">' + crlf   ;
+                           +'    <TotalTime>0</TotalTime>' + crlf                                                                                                                                                     ;
+                           +'    <Company></Company>' + crlf                                                                                                                                                          ;
+                           +'    <HyperlinksChanged>false</HyperlinksChanged>' + crlf                                                                                                                                 ;
+                           +'</Properties>' }
+
+   * ==============================================================================================================================================================================
+   * GRABAMOS ARCHIVO Y EN CASO DE ERROR GRABAMOS MENSAJES Y SEÑALES SUFICIENTES
+   * ==============================================================================================================================================================================
+
+   if !hb_memowrit(::hApp["cname"], ::hApp["contenido"])
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  !! error en GeneraApp()  de clase tExcelFromXlm al intentar grabar archivo app.xml"                                     , ;
+                                           "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      ::lAbortado := .t.
+
+      return(nil)
+
+   endif
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD GeneraCore() CLASS tExcelFromXlm
+
+   * ==============================================================================================================================================================================
+   * DEFINIMOS EL ARCHIVO CORE.XML, ESTE DEBE QUEDAR EN SUBCARPETA \DOCPROPS DE LA CARPETA CONTENEDORA DE XMLS
+   * ==============================================================================================================================================================================
+
+   ::hCore:= {"cname"     => ::cRuta + "\" + ::cNombreDocumento + "_X" + "\docProps\core.xml" , "cname_zip" => "docProps\core.xml" ,                                                                                                                                                                                                                   ;
+            "contenido" => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + crlf                                                                                                                                                                                                                                                            ;
+                          +'<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' + crlf                   ;
+                          +'    <dc:title></dc:title>' + crlf                                                                                                                                                                                                                                                                                          ;
+                          +'    <dc:subject></dc:subject>' + crlf                                                                                                                                                                                                                                                                                      ;
+                          +'    <dc:creator>alguien</dc:creator>' + crlf                                                                                                                                                                                                                                                                               ;
+                          +'    <dc:description></dc:description>' + crlf                                                                                                                                                                                                                                                                              ;
+                          +'    <cp:revision>0</cp:revision>' + crlf                                                                                                                                                                                                                                                                                   ;
+                          +'    <dcterms:created xsi:type="dcterms:W3CDTF">'+fechaammdd(date(), .t.)+'T'+Time()+'Z</dcterms:created>' + crlf                                                                                                                                                                                                                      ;
+                          +'</cp:coreProperties>' }
+
+   * ==============================================================================================================================================================================
+   * GRABAMOS ARCHIVO Y EN CASO DE ERROR GRABAMOS MENSAJES Y SEÑALES SUFICIENTES
+   * ==============================================================================================================================================================================
+
+   if !hb_memowrit(::hCore["cname"], ::hCore["contenido"])
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  !! error en GeneraCore()  de clase tExcelFromXlm al intentar grabar archivo core.xml"                                   , ;
+                                           "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      ::lAbortado := .t.
+
+      return(nil)
+
+   endif
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD GeneraStyles() CLASS tExcelFromXlm
+
+   LOCAL hpaso:= {=>}, hHoja:= {=>}, hTitulo:= {=>}, hColumna:= {=>}
+   LOCAL hformato:= {=>}, hfuente:= {=>}, hrelleno:= {=>}, hestilo:= {=>}
+   LOCAL cnegrita:= "", oEstiloCustomizado, oEstiloLibre
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * LA PRIMERA FUENTE DE LA LISTA SERA LA DEFAULT, LA AGREGAMOS MANUALMENTE
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   AAdd(::afuentes, {"nFuente" => 12, "cNombreFuente" => "Calibri Light", "cColorFuente" => "FF000000", "lNegrita" => .f.})
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * LOS 2 PRIMEROS RELLENOS (FILLS) DEBEN DE ESTAR SIEMPRE PRESENTES POR LOS QUE LOS AÑADIREMOS MANUALMENTE, EL PRIMERO SERA DEFAULT
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   AAdd(::aFills, {"cFill" => "none"})
+   AAdd(::aFills, {"cFill" => "gray125"})
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * AGREGAMOS PARA LA ALINEACION VERTICAL EL VALOR CENTER QUE SERA DEFAULT
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   AAdd(::aAliVertical, {"cAliVertical" => 'center'})
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * ANTES DE ARMAR LOS ESTILOS PROPIOS INSERTAREMOS EN LA PILA DE ESTILOS EL ESTILO DEFAULT, TAMBIEN DEFINIREMOS SU VARIABLE CXMLSTYLE
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   AAdd(::aestilos, {"nFontId"          => 0 ,              ;
+                     "nFillId"          => 0 ,              ;
+                     "nNumFmtId"        => 0 ,              ;
+                     "nAliVerticalId"   => 0 ,              ;
+                     "nAliHorizontalId" => 0 ,              ;
+                     "lNegrita"         => .f.,             ;
+                     "lWrap"            => .f.,             ;
+                     "cXmlStyle"        => '      <xf borderId="0" xfId="0" fontId="0" fillId="0" numFmtId="0" applyFont="1" applyAlignment="1">' +crlf  ;
+                                          +'         <alignment vertical="center" wrapText="0" />' +crlf                                                 ;
+                                          +'      </xf> ' +crlf })
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * HACEMOS UN RECORRIDO PARA DETERMINAR LOS ELEMENTOS INDIVIDUALES DE CADA SECCION DE ESTILOS (FUENTES, FILLS, FORMATOS ESPECIALES, ALINEAACIONES)
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   for each hHoja in ::ahojas
+
+      * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      * SECCION FUENTES DE ENCABEZADOS DE HOJA
+      * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+      ::RegistraEstilo(hHoja:oEstiloEncabezados)
+
+      for each hTitulo in hHoja:atitulos
+
+         ::RegistraEstilo(hTitulo:oEstiloTitulo)
+         ::RegistraEstilo(hTitulo:oEstiloRenglonAbajo)
+
+      next
+
+      for each hColumna in hHoja:aColumnas
+
+         if hColumna:cTitulo = "FECHA"
+
+            hpaso["cnada"]:= ""
+
+         endif
+
+
+         ::RegistraEstilo(hColumna:oEstiloColumna)
+         ::RegistraEstilo(hColumna:oEstiloEncabezado)
+         ::RegistraEstilo(hColumna:oEstiloAlterno1)
+         ::RegistraEstilo(hColumna:oEstiloAlterno2)
+
+         for each oEstiloCustomizado in hColumna:aEstilosCustomizados
+
+            ::RegistraEstilo(oEstiloCustomizado)
+
+         next
+
+      next
+
+      for each oEstiloLibre in ::aEstilosLibres
+
+         ::RegistraEstilo(oEstiloLibre)
+
+      next
+
+   next
+
+   * ==============================================================================================================================================================================
+   * DEFINIMOS EL STYLES.XML, ESTE DEBE QUEDAR EN SUBCARPETA \XL DE LA CARPETA CONTENEDORA DE XMLS
+   * ==============================================================================================================================================================================
+
+   ::hStyles:= {"cname"     => ::cRuta + "\" + ::cNombreDocumento + "_X" + "\xl\styles.xml" ,  "cname_zip" => "xl\styles.xml" ,                                                                  ;
+                "contenido" => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + crlf                                                                                                  ;
+                              +'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' + crlf }
+
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * SECCION FORMATOS ESPECIALES
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   ::hStyles["contenido"] += '   <numFmts count="' + ToString(len(::aFormatos)) + '">' + crlf
+
+   for each hformato in ::aFormatos
+
+      ::hStyles["contenido"] += '      <numFmt numFmtId="' + ToString(hformato["id_formato"]) + '" formatCode="' + hformato["cFormato"] + '" />' + crlf
+
+   next
+
+   ::hStyles["contenido"] += '   </numFmts>' + crlf
+
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * SECCION FUENTES
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   ::hStyles["contenido"] += '   <fonts count="' + ToString(len(::aFuentes)) + '">' + crlf
+
+   for each hfuente in ::aFuentes
+
+      cnegrita:= iif(hfuente["lNegrita"] , '<b />' , '')
+
+      ::hStyles["contenido"] += '      <font>' + cnegrita + crlf                                     ;
+                               +'         <sz val="' + ToString(hfuente["nFuente"]) + '" />'+ crlf   ;
+                               +'         <color rgb="' + hfuente["cColorFuente"] + '" />'+ crlf     ;
+                               +'         <name val="' + hfuente["cNombreFuente"] + '" />'+ crlf     ;
+                               +'         <family val="2" />'+ crlf                                  ;
+                               +'      </font>'+ crlf
+
+   next
+
+   ::hStyles["contenido"] += '   </fonts>'+ crlf
+
+
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * SECCION FILLS - RELLENOS - NOTA: LOS 2 PRIMEROS RELLENOS SON PUESTOS FORZOSAMENTE PARA QUE FUNCIONE BIEN EL EXCEL, EL PRIMERO SERA EL DEFAULT Y LOS PROPIOS DE NUESTRO
+   * DOCUMENTO INICIARAN A PARTIR DEL TERCER RELLENO QUE SERA LLAMADO CON ID = 2
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   ::hStyles["contenido"] += '   <fills count="' + ToString(len(::aFills)) + '">'+ crlf
+
+   for each hrelleno in ::aFills
+
+      if hrelleno["cFill"] = "none" .or. hrelleno["cFill"] = "gray125"
+
+         ::hStyles["contenido"] += '      <fill>'+ crlf                                                       ;
+                                  +'         <patternFill patternType="' + hrelleno["cFill"] + '" />'+ crlf   ;
+                                  +'      </fill>'+ crlf
+
+         loop
+
+      endif
+
+      ::hStyles["contenido"] += '      <fill>'+ crlf                                                 ;
+                               +'         <patternFill patternType="solid">'+ crlf                   ;
+                               +'            <fgColor rgb="' + hrelleno["cFill"] + '" />'+ crlf      ;
+                               +'            <bgColor indexed="64" />' + crlf                        ;
+                               +'         </patternFill>'+ crlf                                      ;
+                               +'      </fill>'+ crlf
+
+   next
+
+   ::hStyles["contenido"] += '   </fills>'+ crlf
+
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * SECCION BORDERS
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   ::hStyles["contenido"] += '   <borders count="1">'+ crlf                                           ;
+                            +'      <border>'+ crlf                                                   ;
+                            +'         <left />'+ crlf                                                ;
+                            +'         <right />'+ crlf                                               ;
+                            +'         <top />'+ crlf                                                 ;
+                            +'         <bottom />'+ crlf                                              ;
+                            +'         <diagonal />'+ crlf                                            ;
+                            +'      </border>'+ crlf                                                  ;
+                            +'   </borders>'+ crlf
+
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * SECCION ESTILOS XFS
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   ::hStyles["contenido"] += '   <cellStyleXfs count="1">'+ crlf                                      ;
+                            +'      <xf numFmtId="0" fontId="0" fillId="0" borderId="0" />'+ crlf     ;
+                            +'   </cellStyleXfs>'+ crlf
+
+
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * SECCION ESTILOS
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   ::hStyles["contenido"] += '   <cellXfs count="' + tostring(len(::aEstilos)) + '">' + crlf
+
+   for each hestilo in ::aEstilos
+
+      ::hStyles["contenido"] += hestilo["cXmlStyle"]
+
+   next
+
+   ::hStyles["contenido"] += '   </cellXfs>' + crlf
+
+
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   * FIN DE SECCION DE STYLES
+   * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   ::hStyles["contenido"] += '</styleSheet>'
+
+   * ==============================================================================================================================================================================
+   * GRABAMOS ARCHIVO Y EN CASO DE ERROR GRABAMOS MENSAJES Y SEÑALES SUFICIENTES
+   * ==============================================================================================================================================================================
+
+   if !hb_memowrit(::hStyles["cname"], ::hStyles["contenido"])
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  !! error en GeneraStyles()  de clase tExcelFromXlm al intentar grabar archivo styles.xml"                               , ;
+                                           "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      return(nil)
+
+   endif
+
+
+RETURN NIL
+
+
+//--------------------------------------------------------------------------
+
+METHOD GeneraWorkBook() CLASS tExcelFromXlm
+
+   LOCAL hHoja
+
+
+   * ==============================================================================================================================================================================
+   * DEFINIMOS EL ARCHIVO WORKBOOK.XML, ESTE DEBE QUEDAR EN SUBCARPETA \XL DE LA CARPETA CONTENEDORA DE XMLS
+   * ==============================================================================================================================================================================
+
+   ::hWorkBook:= {"cname"     => ::cRuta + "\" + ::cNombreDocumento + "_X" + "\xl\workbook.xml" , "cname_zip" => "xl\workbook.xml" ,                                                                     ;
+                  "contenido" => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + crlf                                                                                                        ;
+                                +'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' + crlf     ;
+                                +'<bookViews>' + crlf                                                                                                                                                    ;
+                                    +'<workbookView xWindow="0" yWindow="0" windowWidth="23520" windowHeight="11925" />' + crlf                                                                          ;
+                                +'</bookViews>' + crlf                                                                                                                                                   ;
+                                +'    <sheets>' + crlf }
+
+   for each hHoja in ::ahojas
+
+      ::hWorkBook["contenido"] +='       <sheet name="' + hHoja:cNombre + '" sheetId="' + ToString(hHoja:__enumindex) + '" state="visible" r:id="rId' + ToString(hHoja:__enumindex) + '" />' + crlf
+
+   next
+
+   ::hWorkBook["contenido"] += '    </sheets>' + crlf                                                                                                                                                  ;
+                              +'<calcPr calcId="0" />' + crlf                                                                                                                                          ;
+                              +'</workbook>'
+
+   * ==============================================================================================================================================================================
+   * GRABAMOS ARCHIVO Y EN CASO DE ERROR GRABAMOS MENSAJES Y SEÑALES SUFICIENTES
+   * ==============================================================================================================================================================================
+
+   if !hb_memowrit(::hWorkBook["cname"], ::hWorkBook["contenido"])
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  !! error en GeneraWorkBook() de clase tExcelFromXlm al intentar grabar archivo workbook.xml"                            , ;
+                                           "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      return(nil)
+
+   endif
+
+
+
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD GeneraWoBoRels() CLASS tExcelFromXlm
+
+   LOCAL hHoja
+
+   * ==============================================================================================================================================================================
+   * DEFINIMOS EL ARCHIVO WORKBOOK.XML.RELS, ESTE DEBE QUEDAR EN SUBCARPETA \XL DE LA CARPETA CONTENEDORA DE XMLS
+   * ==============================================================================================================================================================================
+
+   ::hWoBoRels:= {"cname"     => ::cRuta + "\" + ::cNombreDocumento + "_X" + "\xl\_rels\workbook.xml.rels" , "cname_zip" => "xl\_rels\workbook.xml.rels" ,                                          ;
+                  "contenido" => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + crlf                                                                                                   ;
+                                +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + crlf                                                                      ;
+                                +'    <Relationship Id="rId_stylees" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml" />' + crlf }             ;
+
+   for each hHoja in ::ahojas
+
+      ::hWoBoRels["contenido"]+='    <Relationship Id="rId'+ ToString(hHoja:__enumindex) +'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+ ToString(hHoja:__enumindex) +'.xml" />' + crlf
+
+   next
+
+   ::hWoBoRels["contenido"]+='</Relationships>'
+
+
+   * ==============================================================================================================================================================================
+   * GRABAMOS ARCHIVO Y EN CASO DE ERROR GRABAMOS MENSAJES Y SEÑALES SUFICIENTES
+   * ==============================================================================================================================================================================
+
+   if !hb_memowrit(::hWoBoRels["cname"], ::hWoBoRels["contenido"])
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  !! error en GeneraWoBoRels() de clase tExcelFromXlm al intentar grabar archivo workbook.xml.rels"                       , ;
+                                           "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      return(nil)
+
+   endif
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD GeneraHojas() CLASS tExcelFromXlm
+
+   LOCAL hHoja:= {=>}, hrenglon:= {=>}, hcolumna:= {=>}, hTitulo:= {=>}
+   LOCAL hpane:= {=>}
+   LOCAL cletra:= "", cpaso:= "", cestilo:= "", cdias:= ""
+   LOCAL nrow:= 0, nalterno:= 0, nestilo_personalizado:= 0, nestilo_libre:= 0
+   LOCAL udato := nil
+
+   * ==============================================================================================================================================================================
+   * DEFINIMOS LOS ARCHIVOS SHEET1.XML, SHEET2.XML .... , ESTOS DEBEN QUEDAR EN SUBCARPETA \XL\WORKSHEETS DE LA CARPETA CONTENEDORA DE XMLS
+   * ==============================================================================================================================================================================
+
+   for each hHoja in ::aHojas
+
+      cletra:=dameletra(Len(hHoja:Acolumnas))
+
+      nrow:=0
+
+      cpaso := iif(hHoja:__enumindex = 1, "true", "false")
+
+      hHoja:cName      := ::cRuta + "\" + ::cNombreDocumento + "_X" + "\xl\worksheets\sheet" + ToString(hHoja:__enumindex) + ".xml"
+      hHoja:cNameZip   := "xl\worksheets\sheet" + ToString(hHoja:__enumindex) + ".xml"
+      hHoja:cContenido := '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + crlf                                                                                                                   ;
+                         +'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" '                      ;
+                         +'xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision">' + crlf               ;
+                         +'   <dimension ref="A1:' + cletra + '@total_renglones" />' + crlf                                                                                                                  ;
+                         +'   <sheetViews>' + crlf                                                                                                                                                           ;
+                         +'      <sheetView tabSelected="' + cpaso + '" workbookViewId="0">' + crlf
+
+      * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      * SI TENEMOS CONFIGURADO EL INMOVILIZAR PANELES LO ACTIVAMOS
+      * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+      if hHoja:lInmoviliza
+
+         hHoja:cContenido += '         <pane ySplit="@panerenglon" topLeftCell="@panetopleft" activePane="bottomLeft" state="frozen" />' + crlf  ;
+                            +'         <selection activeCell="A1" pane="bottomLeft"/>' + crlf                                                    ;
+                            +'      </sheetView>' + crlf                                                                                         ;
+                            +'   </sheetViews>' + crlf                                                                                                                                                                                                                                                                                                                       ;
+
+         else
+
+         hHoja:cContenido += '         <selection activeCell="A1" />' + crlf                                                    ;
+                            +'      </sheetView>' + crlf                                                                        ;
+                            +'   </sheetViews>' + crlf
+
+
+      endif
+
+
+
+
+
+      * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      * DEFINICIONES DE COLUMNA Y PREPARACION DE DATOS REPETITIVOS POR COLUMNA
+      * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+      hHoja:cContenido+='   <cols>' + crlf
+
+      for each hcolumna in hHoja:aColumnas
+
+         hHoja:cContenido += '      <col min="' + ToString(hcolumna:__enumindex) + '" max="' + ToString(hcolumna:__enumindex) + '" width="' + ToString(hcolumna:nAncho) + '" bestFit="false" customWidth="false"/>' + crlf
+
+         hcolumna:cletra              := dameletra(hcolumna:__enumindex)
+
+      next
+
+      hHoja:cContenido+='   </cols>' + crlf
+
+      * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      * RENGLONES DE TITULOS Y SUBTITULOS
+      * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+      hHoja:cContenido+='   <sheetData>' + crlf
+
+      for each hTitulo in hHoja:aTitulos
+
+         nrow += 1
+
+         cestilo:= ' s="' + ToString(hTitulo:oEstiloTitulo:nStyleId) + '"'
+
+         hHoja:cContenido+='      <row r="'+AllTrim(str(nrow))+'">' + crlf                                       ;
+                          +'         <c r="A' + AllTrim(str(nrow)) + '" t="inlineStr"' + cestilo +'>' + crlf     ;
+                          +'            <is>' + crlf                                                             ;
+                          +'               <t>' + hTitulo:cTexto + '</t>' + crlf                                 ;
+                          +'            </is>' + crlf                                                            ;
+                          +'         </c>' + crlf
+
+         * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+         * RELLENO DE ESTILO PARA LAS CELDAS HERMANAS DE A1 (TODO EL RENGLON)
+         * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+         for each hcolumna in hHoja:aColumnas
+
+            if hcolumna:__enumindex = 1
+               loop
+            endif
+
+            hHoja:cContenido+='         <c r="' + hcolumna:cletra + AllTrim(str(nrow)) + '" ' + cestilo + ' />' + crlf
+
+         next
+
+         hHoja:cContenido+='      </row>' + crlf
+
+         if hTitulo:lBrincaRenglon
+
+            * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            * RELLENO DE ESTILO PARA LAS CELDAS DEL RENGLON BRINCADO
+            * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            nrow += 1
+
+            cestilo:= ' s="' + ToString(hTitulo:oEstiloRenglonAbajo:nStyleId) + '"'
+
+            hHoja:cContenido+='      <row r="'+AllTrim(str(nrow))+'">' + crlf
+
+            for each hcolumna in hHoja:aColumnas
+
+               hHoja:cContenido+='         <c r="' + hcolumna:cletra + AllTrim(str(nrow)) + '" ' + cestilo + ' />' + crlf
+
+            next
+
+            hHoja:cContenido+='      </row>' + crlf
+
+         endif
+
+      next
+
+      * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      * DEFINICIONES DE ENCABEZADOS
+      * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+      nrow += 1
+
+      hHoja:cContenido+='      <row r="'+AllTrim(str(nrow))+'">' + crlf
+
+      for each hcolumna in hHoja:aColumnas
+
+         cestilo:= ' s="' + ToString(hcolumna:oEstiloEncabezado:nStyleId) + '"'
+
+         hHoja:cContenido+='         <c r="' + hcolumna:cletra + AllTrim(str(nrow)) + '" t="inlineStr"' + cestilo + '>' + crlf   ;
+                          +'            <is>' + crlf                                                                             ;
+                          +'               <t>' + hcolumna:cTitulo + '</t>' + crlf                                               ;
+                          +'            </is>' + crlf                                                                            ;
+                          +'         </c>' + crlf                                                                                ;
+
+      next
+
+      hHoja:cContenido+='      </row>' + crlf
+
+
+      * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      * DEFINICIONES DE DATOS RENGLON POR REGLON Y CELDA POR CELDA
+      * ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+      hpane["nrenglon_encabezados"]:= nrow + 1
+
+      for each hrenglon in hHoja:aDatos
+
+         if hb_HHasKey(hrenglon, "lomite_renglon")
+            loop
+         endif
+
+         nrow += 1
+
+         hHoja:cContenido+='      <row r="'+AllTrim(str(nrow))+'">' + crlf
+
+         if hb_HHasKey(hrenglon, "id_estilo_personalizado")
+            nestilo_personalizado := hrenglon["id_estilo_personalizado"]
+            else
+            nalterno:=IIF(nalterno=1,0,1)
+            nestilo_personalizado := 0
+         endif
+
+         for each hcolumna in hHoja:aColumnas
+
+            if nestilo_personalizado <> 0 .and. Len(hcolumna:aEstilosCustomizados) >= nestilo_personalizado
+
+               cestilo:= ' s="' + ToString(hcolumna:aEstilosCustomizados[nestilo_personalizado]:nStyleId) + '"'
+
+               else
+
+               cestilo:= ' s="' + ToString(hcolumna:oEstiloColumna:nStyleId) + '"'
+
+               if hHoja:lPautado
+
+                  cestilo:= IIF(nalterno = 0,  ' s="' + ToString(hcolumna:oEstiloAlterno1:nStyleId) + '"' , cestilo )
+                  cestilo:= IIF(nalterno = 1,  ' s="' + ToString(hcolumna:oEstiloAlterno2:nStyleId) + '"' , cestilo )
+
+               endif
+
+            endif
+
+            udato:=hrenglon[hcolumna:cNombreHash]
+
+            * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            * TIPO CARACTER
+            * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            if ValType(udato) = "C"
+
+               ::LimpiaCadena(@udato)
+
+               hHoja:cContenido+='         <c r="'+ + hcolumna:cletra + AllTrim(str(nrow)) + '" t="inlineStr"' + cestilo + '>' + crlf      ;
+                                +'            <is>'+crlf                                                                                   ;
+                                +'               <t>'+udato+'</t>'+ crlf                                                                   ;
+                                +'            </is>'+ crlf                                                                                 ;
+                                +'         </c>'+ crlf
+
+            endif
+
+            * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            * TIPO FECHA
+            * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            if ValType(udato) = "D"
+
+               cdias := ToString(udato - CToD("01/01/1900"))
+
+               hHoja:cContenido+='         <c r="'+ + hcolumna:cletra + AllTrim(str(nrow)) + '"' + cestilo + '>' + crlf                    ;
+                                +'            <v>'+cdias+'</v>'+ crlf                                                                      ;
+                                +'         </c>'+ crlf
+
+            endif
+
+            * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            * TIPO NUMERICO
+            * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            if ValType(udato) = "N"
+
+               cpaso:=LTrim(Str(udato,20,8))
+
+               hHoja:cContenido+='         <c r="'+ + hcolumna:cletra + AllTrim(str(nrow)) + '"' + cestilo + '>' + crlf                    ;
+                                +'            <v>'+cpaso+'</v>'+ crlf                                                                      ;
+                                +'         </c>'+ crlf
+
+            endif
+
+         next
+
+         hHoja:cContenido+='      </row>' + crlf
+
+         if hb_HHasKey(hrenglon, "lbrinca_renglon_en_blanco") .and. hb_HHasKey(hrenglon, "id_estilo_libre_brinco")
+
+            nestilo_libre := hrenglon["id_estilo_libre_brinco"]
+
+            if nestilo_libre <> 0 .and. Len(::aEstilosLibres) >= nestilo_libre
+
+               cestilo:= ' s="' + ToString(::aEstilosLibres[nestilo_libre]:nStyleId) + '"'
+
+               else
+
+               cestilo:= ' s="0"'
+
+            endif
+
+            nrow += 1
+
+            hHoja:cContenido+='      <row r="'+AllTrim(str(nrow))+'">' + crlf
+
+            for each hcolumna in hHoja:aColumnas
+
+               hHoja:cContenido+='         <c r="'+ + hcolumna:cletra + AllTrim(str(nrow)) + '"' + cestilo + ' />' + crlf
+
+            next
+
+            hHoja:cContenido+='      </row>' + crlf
+
+         endif
+
+      next
+
+      hHoja:cContenido +='   </sheetData>' + crlf                                        ;
+
+
+
+      * ===========================================================================================================================================================================
+      * SI TENEMOS ACTIVADO EL AUTO FILTRO LO ACTIVAMOS
+      * ===========================================================================================================================================================================
+
+      if hHoja:lAutoFiltro
+
+         cpaso:="A" + ToString(hpane["nrenglon_encabezados"]-1) + ":" + dameletra(Len(hHoja:aColumnas)) + ToString(nrow)
+
+         hHoja:cContenido +='   <autoFilter ref="' + cpaso + '" />' + crlf
+
+      endif
+
+      * ===========================================================================================================================================================================
+      * FIN DE XML DE HOJA
+      * ===========================================================================================================================================================================
+
+      hHoja:cContenido +='</worksheet>'
+
+      * ===========================================================================================================================================================================
+      * REEMPLAZAMOS VALORES QUE NO TENIAMOS AL PRINCIPIO DEL ARMADO DE LA PESTAÑA
+      * ===========================================================================================================================================================================
+
+      hHoja:cContenido:= StrTran(hHoja:cContenido, "@total_renglones", ToString(nrow))
+
+      hHoja:cContenido:= StrTran(hHoja:cContenido, "@panerenglon"    , ToString(hpane["nrenglon_encabezados"]-1))
+
+      hHoja:cContenido:= StrTran(hHoja:cContenido, "@panetopleft"    , "A" + ToString(hpane["nrenglon_encabezados"]))
+
+
+
+      * ===========================================================================================================================================================================
+      * GRABAMOS ARCHIVO Y EN CASO DE ERROR GRABAMOS MENSAJES Y SEÑALES SUFICIENTES
+      * ===========================================================================================================================================================================
+
+      if !hb_memowrit(hHoja:cName, hHoja:cContenido)
+
+         AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                              "  !! error en GeneraHojas() de clase tExcelFromXlm al intentar grabar archivo sheet"+ ToString(hHoja:__enumindex) +".xml" , ;
+                                              "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                              "------------------------------------------------------------------------------------------------------------------------"})
+
+         return(nil)
+
+      endif
+
+   next
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD GeneraZip() CLASS tExcelFromXlm
+
+   LOCAL ozip, hHoja:= {=>}, nresultado
+
+
+   * ==============================================================================================================================================================================
+   * NOS POSICIONAMOS EN LA CARPETA CONTENEDORA DE LOS ARCHIVOS XML PARA CREAR EL ARCHIVO ZIP
+   * ==============================================================================================================================================================================
+
+   nresultado:= dirchange(::cRuta + "\" + ::cNombreDocumento + "_X")
+
+   * ==============================================================================================================================================================================
+   * SI EL INTENTO NO FUE EXITOSO, ABORTAMOS EL PROCESO
+   * ==============================================================================================================================================================================
+
+   if nresultado <> 0
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  !! error en GeneraZip() de clase tExcelFromXlm al intentar posicionarse en ruta contenedora de xmls"                    , ;
+                                           "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      return(nil)
+
+   endif
+
+
+
+
+   * ==============================================================================================================================================================================
+   * INICIAMOS L CREACION DEL ARCHIVO ZIP
+   * ==============================================================================================================================================================================
+
+    with object ozip := tzipfile():New()
+      :cFileName    := ::cRuta + "\" + ::cNombreDocumento + ".xlsx"
+      :lIncludeDrive:=.f.
+      :lIncludePath :=.t.
+      :Create()
+    end with
+
+
+
+
+
+
+   * ==============================================================================================================================================================================
+   * AGREGAMOS EL CONJUNTO DE ARCHIVOS AL ZIP
+   * ==============================================================================================================================================================================
+
+     ozip:addfile(::hContentTypes["cname_zip"])
+     ozip:addfile(::hRels["cname_zip"])
+     ozip:addfile(::hWorkBook["cname_zip"])
+     ozip:addfile(::hCore["cname_zip"])
+     ozip:addfile(::hApp["cname_zip"])
+     ozip:addfile(::hWoBoRels["cname_zip"])
+     ozip:addfile(::hStyles["cname_zip"])
+
+     for each hHoja in ::aHojas
+         ozip:addfile(hHoja:cNameZip)
+     next hpestana
+
+
+
+
+
+   * ==============================================================================================================================================================================
+   * CREAMOS EL ARCHIVO ZIP
+   * ==============================================================================================================================================================================
+
+   if !ozip:run()
+
+      *---------------------------------------------
+      * AQUI LOS MENSAJES Y GRABACIONES DEL ERROR
+      *---------------------------------------------
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  !! error en GeneraZip() de clase tExcelFromXlm al intentar el metodo run() de ozip"                                     , ;
+                                           "  !! codigo de error=" + ozip:cLastError                                                                                  , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      return(nil)
+
+   endif
+
+
+   ozip:end()
+
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD GeneraExcel() CLASS tExcelFromXlm
+
+   ::GeneraCarpetas()
+
+   if !::lAbortado
+      ::GeneraContentTypes()
+   endif
+
+   if !::lAbortado
+      ::GeneraRels()
+   endif
+
+   if !::lAbortado
+      ::GeneraApp()
+   endif
+
+   if !::lAbortado
+      ::GeneraCore()
+   endif
+
+   if !::lAbortado
+      ::GeneraStyles()
+   endif
+
+   if !::lAbortado
+      ::GeneraWorkBook()
+   endif
+
+   if !::lAbortado
+      ::GeneraWoBoRels()
+   endif
+
+   if !::lAbortado
+      ::GeneraHojas()
+   endif
+
+   if !::lAbortado
+      ::GeneraZip()
+   endif
+
+   if !::lAbortado
+
+      if ::lBorraXmls
+         ::BorraXmls()
+      endif
+
+   endif
+
+RETURN NIL
+
+
+//--------------------------------------------------------------------------
+
+METHOD BorraXmls() CLASS tExcelFromXlm
+
+   LOCAL oHoja
+   LOCAL nresultado:= 0
+   LOCAL afiles:= {}
+   LOCAL cfile:= "", cCarpeta:= ""
+
+   * ==============================================================================================================================================================================
+   * ANTES DE INICIAR CON LOS BORRADOS NOS POSICIONAMOS EN LA RUTA MARCADA EN EL OBJETO TEXCELFROMXML PARA EVITAR COLISIONES Y ERRORES DE DOS
+   * ==============================================================================================================================================================================
+
+   nresultado:= dirchange(::cRuta )
+
+   * ==============================================================================================================================================================================
+   * SI EL INTENTO NO FUE EXITOSO, ABORTAMOS EL PROCESO
+   * ==============================================================================================================================================================================
+
+   if nresultado <> 0
+
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  ++ error en BorraXmls() de clase tExcelFromXlm al intentar posicionarse en carpeta origen ::cruta"                      , ;
+                                           "  ++ nresultado = " + ToString(nresultado)                                                                                , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+      ::lAbortado:= .t.
+
+      return(nil)
+
+   endif
+
+
+
+
+   * ##############################################################################################################################################################################
+   * BORRADO DE ARCHIVOS XMLS SIMPLES
+   * ##############################################################################################################################################################################
+
+   * ==============================================================================================================================================================================
+   * BORRADO DE LOS XMLS DE LAS HOJAS (SHEET1, SHEET2...)
+   * ==============================================================================================================================================================================
+
+   for each oHoja in ::aHojas
+
+      nresultado:= FErase( oHoja:cName )
+
+      if nresultado == -1
+
+         AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                              "  !! error en BorraXmls() de clase tExcelFromXlm al intentar borrar archivo " + oHoja:cName                               , ;
+                                              "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                              "------------------------------------------------------------------------------------------------------------------------"})
+
+      endif
+
+   next
+
+   * ==============================================================================================================================================================================
+   * BORRADO DE WORKBOOK.XML.RELS
+   * ==============================================================================================================================================================================
+
+   nresultado:= FErase(::hWoBoRels["cname"] )
+
+   if nresultado == -1
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  !! error en BorraXmls() de clase tExcelFromXlm al intentar borrar archivo " + ::hWoBoRels["cname"]                      , ;
+                                           "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+   endif
+
+
+   * ==============================================================================================================================================================================
+   * BORRADO DE WORKBOOK.XML
+   * ==============================================================================================================================================================================
+
+   nresultado:= FErase( ::hWorkBook["cname"] )
+
+   if nresultado == -1
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  !! error en BorraXmls() de clase tExcelFromXlm al intentar borrar archivo " + ::hWorkBook["cname"]                      , ;
+                                           "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+   endif
+
+
+   * ==============================================================================================================================================================================
+   * BORRADO DE STYLES.XML
+   * ==============================================================================================================================================================================
+
+   nresultado:= FErase( ::hStyles["cname"] )
+
+   if nresultado == -1
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  !! error en BorraXmls() de clase tExcelFromXlm al intentar borrar archivo " + ::hStyles["cname"]                        , ;
+                                           "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+   endif
+
+
+   * ==============================================================================================================================================================================
+   * BORRADO DE CORE.XML
+   * ==============================================================================================================================================================================
+
+   nresultado:= FErase( ::hCore["cname"] )
+
+   if nresultado == -1
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  !! error en BorraXmls() de clase tExcelFromXlm al intentar borrar archivo " + ::hCore["cname"]                          , ;
+                                           "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+   endif
+
+   * ==============================================================================================================================================================================
+   * BORRADO DE APP.XML
+   * ==============================================================================================================================================================================
+
+   nresultado:= FErase( ::hApp["cname"] )
+
+   if nresultado == -1
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  !! error en BorraXmls() de clase tExcelFromXlm al intentar borrar archivo " + ::hApp["cname"]                           , ;
+                                           "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+   endif
+
+   * ==============================================================================================================================================================================
+   * BORRADO DE _RELS.XML
+   * ==============================================================================================================================================================================
+
+   nresultado:= FErase( ::hRels["cname"] )
+
+   if nresultado == -1
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  !! error en BorraXmls() de clase tExcelFromXlm al intentar borrar archivo " + ::hRels["cname"]                          , ;
+                                           "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+   endif
+
+   * ==============================================================================================================================================================================
+   * BORRADO DE CONTENT_TYPES
+   * ==============================================================================================================================================================================
+
+   nresultado:= FErase( ::hContentTypes["cname"] )
+
+   if nresultado == -1
+
+      AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                           "  !! error en BorraXmls() de clase tExcelFromXlm al intentar borrar archivo " + ::hContentTypes["cname"]                  , ;
+                                           "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                           "------------------------------------------------------------------------------------------------------------------------"})
+
+   endif
+
+   * ##############################################################################################################################################################################
+   * BORRADO DE CARPETAS
+   * ##############################################################################################################################################################################
+
+   * ==============================================================================================================================================================================
+   * BORRADO DE CARPETA \XL\WORKSHEETS
+   * ==============================================================================================================================================================================
+
+   cCarpeta:=::cRuta + "\" + ::cNombreDocumento + "_X" + "\xl\worksheets\"
+
+   if ::LimpiaDirectorio(cCarpeta)
+
+      nresultado := DirRemove( cCarpeta )
+
+      if nresultado <> 0
+
+         AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------"      ,;
+                                              "  !! error en BorraXmls() de clase tExcelFromXlm al intentar borrar carpeta " + cCarpeta                                       , ;
+                                              "  !! codigo de error=" + ToString(nresultado)                                                                                  , ;
+                                              "------------------------------------------------------------------------------------------------------------------------"})
+
+      endif
+
+   endif
+
+   * ==============================================================================================================================================================================
+   * BORRADO DE CARPETA \XL\_RELS
+   * ==============================================================================================================================================================================
+
+   cCarpeta:=::cRuta + "\" + ::cNombreDocumento + "_X" + "\xl\_rels\"
+
+   if ::LimpiaDirectorio(cCarpeta)
+
+      nresultado := DirRemove( cCarpeta )
+
+      if nresultado <> 0
+
+         AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------"      ,;
+                                              "  !! error en BorraXmls() de clase tExcelFromXlm al intentar borrar carpeta " + cCarpeta                                       , ;
+                                              "  !! codigo de error=" + ToString(nresultado)                                                                                  , ;
+                                              "------------------------------------------------------------------------------------------------------------------------"})
+
+      endif
+
+   endif
+
+   * ==============================================================================================================================================================================
+   * BORRADO DE CARPETA \XL
+   * ==============================================================================================================================================================================
+
+   cCarpeta:=::cRuta + "\" + ::cNombreDocumento + "_X" + "\xl"
+
+   if ::LimpiaDirectorio(cCarpeta)
+
+      nresultado := DirRemove( cCarpeta )
+
+      if nresultado <> 0
+
+         AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------"      ,;
+                                              "  !! error en BorraXmls() de clase tExcelFromXlm al intentar borrar carpeta " + cCarpeta                                       , ;
+                                              "  !! codigo de error=" + ToString(nresultado)                                                                                  , ;
+                                              "------------------------------------------------------------------------------------------------------------------------"})
+
+      endif
+
+   endif
+
+   * ==============================================================================================================================================================================
+   * BORRADO DE CARPETA \DOCPROPS
+   * ==============================================================================================================================================================================
+
+   cCarpeta:=::cRuta + "\" + ::cNombreDocumento + "_X" + "\docprops"
+
+   if ::LimpiaDirectorio(cCarpeta)
+
+      nresultado := DirRemove( cCarpeta )
+
+      if nresultado <> 0
+
+         AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------"      ,;
+                                              "  !! error en BorraXmls() de clase tExcelFromXlm al intentar borrar carpeta " + cCarpeta                                       , ;
+                                              "  !! codigo de error=" + ToString(nresultado)                                                                                  , ;
+                                              "------------------------------------------------------------------------------------------------------------------------"})
+
+      endif
+
+   endif
+
+   * ==============================================================================================================================================================================
+   * BORRADO DE CARPETA \_RELS
+   * ==============================================================================================================================================================================
+
+   cCarpeta:=::cRuta + "\" + ::cNombreDocumento + "_X" + "\_rels"
+
+   if ::LimpiaDirectorio(cCarpeta)
+
+      nresultado := DirRemove( cCarpeta )
+
+      if nresultado <> 0
+
+         AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------"      ,;
+                                              "  !! error en BorraXmls() de clase tExcelFromXlm al intentar borrar carpeta " + cCarpeta                                       , ;
+                                              "  !! codigo de error=" + ToString(nresultado)                                                                                  , ;
+                                              "------------------------------------------------------------------------------------------------------------------------"})
+
+      endif
+
+   endif
+
+
+   * ==============================================================================================================================================================================
+   * BORRADO DE CARPETA CONTENEDORA DE XMLS
+   * ==============================================================================================================================================================================
+
+   cCarpeta:=::cRuta + "\" + ::cNombreDocumento + "_X"
+
+   if ::LimpiaDirectorio(cCarpeta)
+
+      nresultado := DirRemove( cCarpeta )
+
+      if nresultado <> 0
+
+         AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------"      ,;
+                                              "  !! error en BorraXmls() de clase tExcelFromXlm al intentar borrar carpeta " + cCarpeta                                       , ;
+                                              "  !! codigo de error=" + ToString(nresultado)                                                                                  , ;
+                                              "------------------------------------------------------------------------------------------------------------------------"})
+
+      endif
+
+   endif
+
+
+
+/*
+
+FErase( <cFile> ) → nSuccess
+Arguments
+cFile Name of file to erase.
+Returns
+nSuccess 0 if successful, -1 if not
+
+DirRemove( <cDirectory> ) → nError
+
+   PROPERTY hContentTypes     INIT {=>}
+   PROPERTY hRels             INIT {=>}
+   PROPERTY hApp              INIT {=>}
+   PROPERTY hCore             INIT {=>}
+   PROPERTY hStyles           INIT {=>}
+   PROPERTY hWorkBook         INIT {=>}
+   PROPERTY hWoBoRels         INIT {=>}
+
+
+   PROPERTY aHojas            INIT {}
+
+*/
+
+
+
+
+
+
+
+
+
+   * ==============================================================================================================================================================================
+   * INICIAREMOS CREANDO LA ESTRUCTURA DE CARPETAS Y SUBCARPETAS, LA ESTRUCTURA BASE QUEDARIA DE ESTA MANERA
+   * ==============================================================================================================================================================================
+   * - ROOT                - LA CARPETA ROOT LA CREAREMOS CON EL MISMO NOMBRE QUE LLEVARA EL DOCUMENTO EXCEL, CON ESTO SERA FACIL IDENTIFICAR CADA CREACION SOLICITADA
+   *                       - EN ESTA CARPETA SE UBICARA EL ARCHIVO |[CONTENT.TYPES].XML|
+   *   - _RELS             -   EN ESTA CARPETA SE UBICARA EL ARCHIVO |.RELS|
+   *   - DOCPROPS          -   EN ESTA CARPETA SE UBICARAN LOS ARCHIVOS |APP.XML| Y |CORE.XML|
+   *   - XL                -   EN ESTA CARPETA SE UBICARAN LOS ARCHIVOS ||STYLES.XML|| Y ||WORKBOOK.XML||
+   *     - _RELS           -      EN ESTA CARPETA SE UBICARA EL ARCHIVO ||WORKBOOK.XML.RELS||
+   *     - WORKSHEETS      -      EN ESTA CARPETA SE UBICARAN LOS ARCHIVOS ||SHEET1.XML||, ||SHEET2.XML||, ||SHEET3.XML||, ...||SHEETN.XML||
+   * ==============================================================================================================================================================================
+
+RETURN NIL
+
+//--------------------------------------------------------------------------
+
+METHOD LimpiaDirectorio(cruta) CLASS tExcelFromXlm
+
+   LOCAL afiles:= {}, cfile:= "", nresultado:= 0
+
+   afiles:= Directory(cruta + "\*.*")
+
+   for each cfile in afiles
+
+      nresultado:= FErase( cruta + "\" + cfile[1] )
+
+      if nresultado == -1
+
+         AppData:oFileLog:GrabaMensajesEnLog({"------------------------------------------------------------------------------------------------------------------------" , ;
+                                              "  !! error en LimpiaDirectorio() de clase tExcelFromXlm al intentar borrar archivo " + cfile[1]                           , ;
+                                              "  !! codigo de error=" + ToString(ferror())                                                                               , ;
+                                              "------------------------------------------------------------------------------------------------------------------------"})
+
+         return(.f.)
+
+      endif
+
+   next
+
+RETURN (.t.)
+
+//------------------------------------------------------------------------------

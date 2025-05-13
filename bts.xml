@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- Xailer BTS -->
+<!-- Date: 26/01/2023 Time: 07:37:25 -->
+<!-- Last access: EDUARDO CASA -->
+<bts>
+   <config/>
+   <todo>
+      <line>
+         <ID>1</ID>
+         <CATEGORY>PENDIENTES</CATEGORY>
+         <PRIORITY>1</PRIORITY>
+         <DESCRIPTION>falta documentacion de escribe_linea_datos</DESCRIPTION>
+         <DONE>0</DONE>
+         <NOTIFYDATE>26/01/2023</NOTIFYDATE>
+         <ASIGNEDDATE>  /  /    </ASIGNEDDATE>
+         <DONEDATE>  /  /    </DONEDATE>
+      </line>
+   </todo>
+</bts>
+

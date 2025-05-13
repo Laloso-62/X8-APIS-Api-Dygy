@@ -1,0 +1,210 @@
+28/11/2023 03:20:48   ******** Entre a API-DYGY.EXE     12048.9730
+28/11/2023 03:20:48   ******** en onShow de API-DYGY:principal appdata:cfile_json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12048.9880
+28/11/2023 03:20:48   ******** en onShow despues de leer el archivo json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12048.9890
+28/11/2023 03:20:48   ******** antes de rutear cfuncion = consulta_cartera_clientes_excel     12048.9900
+28/11/2023 03:20:48   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     12048.9920
+28/11/2023 03:20:49   ******** en APi_DYGY ya conectado a servidor de bd     12049.5270
+28/11/2023 03:20:49   $$$$**|| en genera_nuevo_excel_cartera_clientes_antiguedad_un_cliente iniciando configuracion                  12049.5320
+28/11/2023 03:20:49   ******** En excel_por_xlm iniciando definicion  de hoja 1     12049.5390
+28/11/2023 03:20:49      ---///// en agrega columna procesando columna = FACTURA
+28/11/2023 03:20:49      ---///// en agrega columna procesando columna = FECHA
+28/11/2023 03:20:49      ---///// en agrega columna procesando columna = CONCEPTO
+28/11/2023 03:20:49      ---///// en agrega columna procesando columna = IMPORTE
+28/11/2023 03:20:49      ---///// en agrega columna procesando columna = PAGOS
+28/11/2023 03:20:49      ---///// en agrega columna procesando columna = SALDO
+28/11/2023 03:20:49      ---///// en agrega columna procesando columna = NO VENCIDO
+28/11/2023 03:20:49      ---///// en agrega columna procesando columna = VENCIDO 1 - 30 DIAS
+28/11/2023 03:20:49      ---///// en agrega columna procesando columna = VENCIDO 31 - 60 DIAS
+28/11/2023 03:20:49      ---///// en agrega columna procesando columna = VENCIDO 61-90 DIAS 
+28/11/2023 03:20:49      ---///// en agrega columna procesando columna = VENCIDO MAS DE 90 DIAS 
+28/11/2023 03:20:49   ******** entrando a GeneraCarpetas     12049.5560
+28/11/2023 03:20:49   ******** en GeneraCarpetas() antes de cambiar a ::cruta=c:\apache24\htdocs\dygy\excel         12049.5560
+28/11/2023 03:21:11   ******** Entre a API-DYGY.EXE     12071.5770
+28/11/2023 03:21:11   ******** en onShow de API-DYGY:principal appdata:cfile_json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12071.6740
+28/11/2023 03:21:11   ******** en onShow despues de leer el archivo json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12071.6750
+28/11/2023 03:21:11   ******** antes de rutear cfuncion = consulta_cartera_clientes_excel     12071.6770
+28/11/2023 03:21:11   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     12071.6780
+28/11/2023 03:21:12   ******** en APi_DYGY ya conectado a servidor de bd     12072.2110
+28/11/2023 03:21:12   $$$$**|| en genera_nuevo_excel_cartera_clientes_antiguedad_un_cliente iniciando configuracion                  12072.2140
+28/11/2023 03:21:12   ******** En excel_por_xlm iniciando definicion  de hoja 1     12072.2180
+28/11/2023 03:21:12      ---///// en agrega columna procesando columna = FACTURA
+28/11/2023 03:21:12      ---///// en agrega columna procesando columna = FECHA
+28/11/2023 03:21:12      ---///// en agrega columna procesando columna = CONCEPTO
+28/11/2023 03:21:12      ---///// en agrega columna procesando columna = IMPORTE
+28/11/2023 03:21:12      ---///// en agrega columna procesando columna = PAGOS
+28/11/2023 03:21:12      ---///// en agrega columna procesando columna = SALDO
+28/11/2023 03:21:12      ---///// en agrega columna procesando columna = NO VENCIDO
+28/11/2023 03:21:12      ---///// en agrega columna procesando columna = VENCIDO 1 - 30 DIAS
+28/11/2023 03:21:12      ---///// en agrega columna procesando columna = VENCIDO 31 - 60 DIAS
+28/11/2023 03:21:12      ---///// en agrega columna procesando columna = VENCIDO 61-90 DIAS 
+28/11/2023 03:21:12      ---///// en agrega columna procesando columna = VENCIDO MAS DE 90 DIAS 
+28/11/2023 03:21:12   ******** entrando a GeneraCarpetas     12072.2280
+28/11/2023 03:21:12   ******** en GeneraCarpetas() antes de cambiar a ::cruta=c:\apache24\htdocs\dygy\excel         12072.2280
+28/11/2023 03:21:47   ******** Entre a API-DYGY.EXE     12107.7530
+28/11/2023 03:21:47   ******** en onShow de API-DYGY:principal appdata:cfile_json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12107.7700
+28/11/2023 03:21:47   ******** en onShow despues de leer el archivo json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12107.7720
+28/11/2023 03:21:47   ******** antes de rutear cfuncion = consulta_cartera_clientes_excel     12107.7730
+28/11/2023 03:21:47   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     12107.7740
+28/11/2023 03:21:48   ******** en APi_DYGY ya conectado a servidor de bd     12108.3090
+28/11/2023 03:21:48   $$$$**|| en genera_nuevo_excel_cartera_clientes_antiguedad_un_cliente iniciando configuracion                  12108.3130
+28/11/2023 03:21:48   ******** En excel_por_xlm iniciando definicion  de hoja 1     12108.3170
+28/11/2023 03:21:48      ---///// en agrega columna procesando columna = FACTURA
+28/11/2023 03:21:48      ---///// en agrega columna procesando columna = FECHA
+28/11/2023 03:21:48      ---///// en agrega columna procesando columna = CONCEPTO
+28/11/2023 03:21:48      ---///// en agrega columna procesando columna = IMPORTE
+28/11/2023 03:21:48      ---///// en agrega columna procesando columna = PAGOS
+28/11/2023 03:21:48      ---///// en agrega columna procesando columna = SALDO
+28/11/2023 03:21:48      ---///// en agrega columna procesando columna = NO VENCIDO
+28/11/2023 03:21:48      ---///// en agrega columna procesando columna = VENCIDO 1 - 30 DIAS
+28/11/2023 03:21:48      ---///// en agrega columna procesando columna = VENCIDO 31 - 60 DIAS
+28/11/2023 03:21:48      ---///// en agrega columna procesando columna = VENCIDO 61-90 DIAS 
+28/11/2023 03:21:48      ---///// en agrega columna procesando columna = VENCIDO MAS DE 90 DIAS 
+28/11/2023 03:21:48   ******** entrando a GeneraCarpetas     12108.3290
+28/11/2023 03:21:48   ******** en GeneraCarpetas() antes de cambiar a ::cruta=c:\apache24\htdocs\dygy\excel         12108.3300
+28/11/2023 03:24:30   ******** Entre a API-DYGY.EXE     12270.1420
+28/11/2023 03:24:30   ******** en onShow de API-DYGY:principal appdata:cfile_json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12270.1550
+28/11/2023 03:24:30   ******** en onShow despues de leer el archivo json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12270.1560
+28/11/2023 03:24:30   ******** antes de rutear cfuncion = consulta_cartera_clientes_excel     12270.1570
+28/11/2023 03:24:30   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     12270.1590
+28/11/2023 03:24:30   ******** en APi_DYGY ya conectado a servidor de bd     12270.6990
+28/11/2023 03:24:30   $$$$**|| en genera_nuevo_excel_cartera_clientes_antiguedad_un_cliente iniciando configuracion                  12270.7020
+28/11/2023 03:24:30   ******** En excel_por_xlm iniciando definicion  de hoja 1     12270.7070
+28/11/2023 03:24:30      ---///// en agrega columna procesando columna = FACTURA
+28/11/2023 03:24:30      ---///// en agrega columna procesando columna = FECHA
+28/11/2023 03:24:30      ---///// en agrega columna procesando columna = CONCEPTO
+28/11/2023 03:24:30      ---///// en agrega columna procesando columna = IMPORTE
+28/11/2023 03:24:30      ---///// en agrega columna procesando columna = PAGOS
+28/11/2023 03:24:30      ---///// en agrega columna procesando columna = SALDO
+28/11/2023 03:24:30      ---///// en agrega columna procesando columna = NO VENCIDO
+28/11/2023 03:24:30      ---///// en agrega columna procesando columna = VENCIDO 1 - 30 DIAS
+28/11/2023 03:24:30      ---///// en agrega columna procesando columna = VENCIDO 31 - 60 DIAS
+28/11/2023 03:24:30      ---///// en agrega columna procesando columna = VENCIDO 61-90 DIAS 
+28/11/2023 03:24:30      ---///// en agrega columna procesando columna = VENCIDO MAS DE 90 DIAS 
+28/11/2023 03:24:30   ******** entrando a GeneraCarpetas     12270.7170
+28/11/2023 03:24:30   ******** en GeneraCarpetas() antes de cambiar a ::cruta=c:\apache24\htdocs\dygy\excel         12270.7170
+28/11/2023 03:26:06   ******** Entre a API-DYGY.EXE     12366.5970
+28/11/2023 03:26:06   ******** en onShow de API-DYGY:principal appdata:cfile_json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12366.6160
+28/11/2023 03:26:06   ******** en onShow despues de leer el archivo json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12366.6170
+28/11/2023 03:26:06   ******** antes de rutear cfuncion = consulta_cartera_clientes_excel     12366.6190
+28/11/2023 03:26:06   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     12366.6210
+28/11/2023 03:26:07   ******** en APi_DYGY ya conectado a servidor de bd     12367.1640
+28/11/2023 03:26:07   $$$$**|| en genera_nuevo_excel_cartera_clientes_antiguedad_un_cliente iniciando configuracion                  12367.1680
+28/11/2023 03:26:07   ******** En excel_por_xlm iniciando definicion  de hoja 1     12367.1790
+28/11/2023 03:26:07      ---///// en agrega columna procesando columna = FACTURA
+28/11/2023 03:26:07      ---///// en agrega columna procesando columna = FECHA
+28/11/2023 03:26:07      ---///// en agrega columna procesando columna = CONCEPTO
+28/11/2023 03:26:07      ---///// en agrega columna procesando columna = IMPORTE
+28/11/2023 03:26:07      ---///// en agrega columna procesando columna = PAGOS
+28/11/2023 03:26:07      ---///// en agrega columna procesando columna = SALDO
+28/11/2023 03:26:07      ---///// en agrega columna procesando columna = NO VENCIDO
+28/11/2023 03:26:07      ---///// en agrega columna procesando columna = VENCIDO 1 - 30 DIAS
+28/11/2023 03:26:07      ---///// en agrega columna procesando columna = VENCIDO 31 - 60 DIAS
+28/11/2023 03:26:07      ---///// en agrega columna procesando columna = VENCIDO 61-90 DIAS 
+28/11/2023 03:26:07      ---///// en agrega columna procesando columna = VENCIDO MAS DE 90 DIAS 
+28/11/2023 03:26:07   ******** entrando a GeneraCarpetas     12367.2060
+28/11/2023 03:26:07   ******** en GeneraCarpetas() antes de cambiar a ::cruta=c:\apache24\htdocs\dygy\excel         12367.2070
+28/11/2023 03:27:02   ******** Entre a API-DYGY.EXE     12422.6340
+28/11/2023 03:27:02   ******** en onShow de API-DYGY:principal appdata:cfile_json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12422.6550
+28/11/2023 03:27:02   ******** en onShow despues de leer el archivo json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12422.6560
+28/11/2023 03:27:02   ******** antes de rutear cfuncion = consulta_cartera_clientes_excel     12422.6580
+28/11/2023 03:27:02   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     12422.6590
+28/11/2023 03:27:03   ******** en APi_DYGY ya conectado a servidor de bd     12423.2030
+28/11/2023 03:27:03   $$$$**|| en genera_nuevo_excel_cartera_clientes_antiguedad_un_cliente iniciando configuracion                  12423.2070
+28/11/2023 03:27:03   ******** En excel_por_xlm iniciando definicion  de hoja 1     12423.2130
+28/11/2023 03:27:03      ---///// en agrega columna procesando columna = FACTURA
+28/11/2023 03:27:03      ---///// en agrega columna procesando columna = FECHA
+28/11/2023 03:27:03      ---///// en agrega columna procesando columna = CONCEPTO
+28/11/2023 03:27:03      ---///// en agrega columna procesando columna = IMPORTE
+28/11/2023 03:27:03      ---///// en agrega columna procesando columna = PAGOS
+28/11/2023 03:27:03      ---///// en agrega columna procesando columna = SALDO
+28/11/2023 03:27:03      ---///// en agrega columna procesando columna = NO VENCIDO
+28/11/2023 03:27:03      ---///// en agrega columna procesando columna = VENCIDO 1 - 30 DIAS
+28/11/2023 03:27:03      ---///// en agrega columna procesando columna = VENCIDO 31 - 60 DIAS
+28/11/2023 03:27:03      ---///// en agrega columna procesando columna = VENCIDO 61-90 DIAS 
+28/11/2023 03:27:03      ---///// en agrega columna procesando columna = VENCIDO MAS DE 90 DIAS 
+28/11/2023 03:27:03   ******** entrando a GeneraCarpetas     12423.2230
+28/11/2023 03:27:03   ******** en GeneraCarpetas() antes de cambiar a ::cruta=c:\apache24\htdocs\dygy\excel         12423.2240
+28/11/2023 03:28:01   ******** Entre a API-DYGY.EXE     12481.5110
+28/11/2023 03:28:01   ******** en onShow de API-DYGY:principal appdata:cfile_json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12481.5300
+28/11/2023 03:28:01   ******** en onShow despues de leer el archivo json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12481.5320
+28/11/2023 03:28:01   ******** antes de rutear cfuncion = consulta_cartera_clientes_excel     12481.5330
+28/11/2023 03:28:01   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     12481.5340
+28/11/2023 03:28:02   ******** en APi_DYGY ya conectado a servidor de bd     12482.0790
+28/11/2023 03:28:02   $$$$**|| en genera_nuevo_excel_cartera_clientes_antiguedad_un_cliente iniciando configuracion                  12482.0830
+28/11/2023 03:28:02   ******** En excel_por_xlm iniciando definicion  de hoja 1     12482.0880
+28/11/2023 03:28:02      ---///// en agrega columna procesando columna = FACTURA
+28/11/2023 03:28:02      ---///// en agrega columna procesando columna = FECHA
+28/11/2023 03:28:02      ---///// en agrega columna procesando columna = CONCEPTO
+28/11/2023 03:28:02      ---///// en agrega columna procesando columna = IMPORTE
+28/11/2023 03:28:02      ---///// en agrega columna procesando columna = PAGOS
+28/11/2023 03:28:02      ---///// en agrega columna procesando columna = SALDO
+28/11/2023 03:28:02      ---///// en agrega columna procesando columna = NO VENCIDO
+28/11/2023 03:28:02      ---///// en agrega columna procesando columna = VENCIDO 1 - 30 DIAS
+28/11/2023 03:28:02      ---///// en agrega columna procesando columna = VENCIDO 31 - 60 DIAS
+28/11/2023 03:28:02      ---///// en agrega columna procesando columna = VENCIDO 61-90 DIAS 
+28/11/2023 03:28:02      ---///// en agrega columna procesando columna = VENCIDO MAS DE 90 DIAS 
+28/11/2023 03:28:02   ******** entrando a GeneraCarpetas     12482.1000
+28/11/2023 03:28:02   ******** en GeneraCarpetas() antes de cambiar a ::cruta=c:\apache24\htdocs\dygy\excel         12482.1010
+28/11/2023 03:31:52   ******** Entre a API-DYGY.EXE     12712.4920
+28/11/2023 03:31:52   ******** en onShow de API-DYGY:principal appdata:cfile_json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12712.5050
+28/11/2023 03:31:52   ******** en onShow despues de leer el archivo json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12712.5060
+28/11/2023 03:31:52   ******** antes de rutear cfuncion = consulta_cartera_clientes_excel     12712.5070
+28/11/2023 03:31:52   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     12712.5080
+28/11/2023 03:31:53   ******** en APi_DYGY ya conectado a servidor de bd     12713.0460
+28/11/2023 03:31:53   $$$$**|| en genera_nuevo_excel_cartera_clientes_antiguedad_un_cliente iniciando configuracion                  12713.0500
+28/11/2023 03:31:53   ******** En excel_por_xlm iniciando definicion  de hoja 1     12713.0550
+28/11/2023 03:31:53      ---///// en agrega columna procesando columna = FACTURA
+28/11/2023 03:31:53      ---///// en agrega columna procesando columna = FECHA
+28/11/2023 03:31:53      ---///// en agrega columna procesando columna = CONCEPTO
+28/11/2023 03:31:53      ---///// en agrega columna procesando columna = IMPORTE
+28/11/2023 03:31:53      ---///// en agrega columna procesando columna = PAGOS
+28/11/2023 03:31:53      ---///// en agrega columna procesando columna = SALDO
+28/11/2023 03:31:53      ---///// en agrega columna procesando columna = NO VENCIDO
+28/11/2023 03:31:53      ---///// en agrega columna procesando columna = VENCIDO 1 - 30 DIAS
+28/11/2023 03:31:53      ---///// en agrega columna procesando columna = VENCIDO 31 - 60 DIAS
+28/11/2023 03:31:53      ---///// en agrega columna procesando columna = VENCIDO 61-90 DIAS 
+28/11/2023 03:31:53      ---///// en agrega columna procesando columna = VENCIDO MAS DE 90 DIAS 
+28/11/2023 03:31:53   ******** entrando a GeneraCarpetas     12713.0740
+28/11/2023 03:31:53   ******** en GeneraCarpetas() antes de cambiar a ::cruta=c:\apache24\htdocs\dygy\excel         12713.0750
+28/11/2023 03:33:35   ******** Entre a API-DYGY.EXE     12815.2030
+28/11/2023 03:33:35   ******** en onShow de API-DYGY:principal appdata:cfile_json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12815.2170
+28/11/2023 03:33:35   ******** en onShow despues de leer el archivo json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      12815.2180
+28/11/2023 03:33:35   ******** antes de rutear cfuncion = consulta_cartera_clientes_excel     12815.2200
+28/11/2023 03:33:35   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     12815.2210
+28/11/2023 03:33:35   ******** en APi_DYGY ya conectado a servidor de bd     12815.7560
+28/11/2023 03:33:35   $$$$**|| en genera_nuevo_excel_cartera_clientes_antiguedad_un_cliente iniciando configuracion                  12815.7600
+28/11/2023 03:33:35   ******** En excel_por_xlm iniciando definicion  de hoja 1     12815.7660
+28/11/2023 03:33:35      ---///// en agrega columna procesando columna = FACTURA
+28/11/2023 03:33:35      ---///// en agrega columna procesando columna = FECHA
+28/11/2023 03:33:35      ---///// en agrega columna procesando columna = CONCEPTO
+28/11/2023 03:33:35      ---///// en agrega columna procesando columna = IMPORTE
+28/11/2023 03:33:35      ---///// en agrega columna procesando columna = PAGOS
+28/11/2023 03:33:35      ---///// en agrega columna procesando columna = SALDO
+28/11/2023 03:33:35      ---///// en agrega columna procesando columna = NO VENCIDO
+28/11/2023 03:33:35      ---///// en agrega columna procesando columna = VENCIDO 1 - 30 DIAS
+28/11/2023 03:33:35      ---///// en agrega columna procesando columna = VENCIDO 31 - 60 DIAS
+28/11/2023 03:33:35      ---///// en agrega columna procesando columna = VENCIDO 61-90 DIAS 
+28/11/2023 03:33:35      ---///// en agrega columna procesando columna = VENCIDO MAS DE 90 DIAS 
+28/11/2023 03:33:35   ******** entrando a GeneraCarpetas     12815.7860
+28/11/2023 03:33:35   ******** en GeneraCarpetas() antes de cambiar a ::cruta=c:\apache24\htdocs\dygy\excel         12815.7870
+28/11/2023 03:37:46   ******** Entre a API-DYGY.EXE     13066.5460
+28/11/2023 03:37:46   ******** en onShow de API-DYGY:principal appdata:cfile_json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      13066.5600
+28/11/2023 03:37:46   ******** en onShow despues de leer el archivo json=c:\apache24\htdocs\dygy\proceso\con-car-clx-12711202300193938.json      13066.5610
+28/11/2023 03:37:46   ******** antes de rutear cfuncion = consulta_cartera_clientes_excel     13066.5620
+28/11/2023 03:37:46   ******** en API-DYGY Inicializando funcion consulta_cartera_clientes_excel     13066.5630
+28/11/2023 03:37:47   ******** en APi_DYGY ya conectado a servidor de bd     13067.0970
+28/11/2023 03:37:47   $$$$**|| en genera_nuevo_excel_cartera_clientes_antiguedad_un_cliente iniciando configuracion                  13067.1000
+28/11/2023 03:37:47   ******** En excel_por_xlm iniciando definicion  de hoja 1     13067.1030
+28/11/2023 03:37:47      ---///// en agrega columna procesando columna = FACTURA
+28/11/2023 03:37:47      ---///// en agrega columna procesando columna = FECHA
+28/11/2023 03:37:47      ---///// en agrega columna procesando columna = CONCEPTO
+28/11/2023 03:37:47      ---///// en agrega columna procesando columna = IMPORTE
+28/11/2023 03:37:47      ---///// en agrega columna procesando columna = PAGOS
+28/11/2023 03:37:47      ---///// en agrega columna procesando columna = SALDO
+28/11/2023 03:37:47      ---///// en agrega columna procesando columna = NO VENCIDO
+28/11/2023 03:37:47      ---///// en agrega columna procesando columna = VENCIDO 1 - 30 DIAS
+28/11/2023 03:37:47      ---///// en agrega columna procesando columna = VENCIDO 31 - 60 DIAS
+28/11/2023 03:37:47      ---///// en agrega columna procesando columna = VENCIDO 61-90 DIAS 
+28/11/2023 03:37:47      ---///// en agrega columna procesando columna = VENCIDO MAS DE 90 DIAS 
+28/11/2023 03:37:47   ******** entrando a GeneraCarpetas     13067.1130
+28/11/2023 03:37:47   ******** en GeneraCarpetas() antes de cambiar a ::cruta=c:\apache24\htdocs\dygy\excel         13067.1140

@@ -1,0 +1,109 @@
+/*
+ * Proyecto: Api-Rezta
+ * Fichero: f_Conexiones.prg
+ * Descripción:
+ * Autor:
+ * Fecha: 29/08/2022
+ */
+
+#include "Xailer.ch"
+#include "Digio.ch"
+
+//------------------------------------------------------------------------------
+
+FUNCTION conecta_bd()
+
+   LOCAL hpaso:= {=>}, hestado:= {=>}, origenbd
+
+   WITH OBJECT origenbd := tAdoConnect():New()
+     :cHost         := "167.114.103.204"
+     :cUser         := "root"
+     :nPort         := 3308
+     :cPassword     := "PasaleMaria9!"
+     :cDriver       := "MariaDB ODBC 3.0 Driver"
+     :ldisplayerrors:=.f.
+     :labortonerrors:=.f.
+     :Connect()
+   END WITH
+
+   if Len(origenbd:cMsgError)>0 // si no esta vacios ha producido un error
+
+      LogFile(DToC(Date())+" "+Time()+"******* ERRORES API-DYGY AL INTENTAR CONEXION EN " +origenbd:cHost + " *****")
+      LogFile(DToC(Date())+" "+Time()+origenbd:cLastError)
+      LogFile(DToC(Date())+" "+Time()+origenbd:cInfoError)
+      LogFile(DToC(Date())+" "+Time()+origenbd:cMsgError)
+      LogFile(DToC(Date())+" "+Time()+"*******")
+
+      *--------------------------------------------------------------------------------------------------------------------------------------
+      * AL PRENDER ESTA VARIABLE MANDARA LA SEÃ‘AL A TODOS LOS PROCESOS QUE YA NO CONTINUE.
+      *--------------------------------------------------------------------------------------------------------------------------------------
+
+      appdata:hreporte["laborta_proceso"] := .t.
+
+      *--------------------------------------------------------------------------------------------------------------------------------------
+      * GRABAMOS MENSAJE INTERNO Y A LA VEZ PARA CGI PARA QUE AVISE A USUARIO
+      *--------------------------------------------------------------------------------------------------------------------------------------
+
+      inicializa_estructura_estado_peticion_api( @hestado )
+
+      hestado["cEstado"]                   := "Cancelado"
+      hestado["cDescripcion"]              := "Fallo conexion con base de datos en API-DYGY"
+      hestado["cTituloTextoUsuario"]       := "El sistema NO puede conectar con servidor, su peticion no puede ser resuelta"
+      hestado["cTextoUsuario"]             := "Reporte este mensaje a su asesor de sistemas"
+
+      hpaso["cgraba"] := HB_JsonEncode( hestado )
+
+      hb_memowrit( appdata:hreporte["carchivo_error"], hpaso["cgraba"] )
+
+      return(.f.)
+
+   endif
+
+   AppData:origen_bd:= origenbd
+
+RETURN (.t.)
+
+//------------------------------------------------------------------------------
+
+FUNCTION error_ado(hadoerror)
+
+   LOCAL hpaso:= {=>}, hestado:= {=>}
+
+   *--------------------------------------------------------------------------------------------------------------------------------------
+   * SI LA VARIABLE TIENE LONGITUS MAYOR A CERO SIGNIFICA QUE HA OCURRIDO UN ERROR
+   *--------------------------------------------------------------------------------------------------------------------------------------
+
+   if Len(appdata:origen_bd:cMsgError)>0
+
+      *--------------------------------------------------------------------------------------------------------------------------------------
+      * GRABAMOS MENSAJE INTERNO Y A LA VEZ PARA CGI PARA QUE AVISE A USUARIO
+      *--------------------------------------------------------------------------------------------------------------------------------------
+
+      inicializa_estructura_estado_peticion_api( @hestado )
+
+      hestado["cEstado"]                   := "Cancelado"
+      hestado["cDescripcion"]              := "Error dentro de API en peticion de base de datos |" + hadoerror["cquery"]+"|"
+      hestado["cTituloTextoUsuario"]       := "Ha ocurrido un error con base de datos, su peticion no puede ser resuelta"
+      hestado["cTextoUsuario"]             := "Reporte este mensaje a su asesor de sistemas"
+
+      hpaso["cgraba"] := HB_JsonEncode( hestado )
+
+      hb_memowrit( appdata:hreporte["carchivo_error"], hpaso["cgraba"] )
+
+      appdata:hreporte["laborta_proceso"] := .t.
+
+      LogFile(DToC(Date())+" "+Time()+"******* ERROR ADO EN API-DYGY EN " + appdata:origen_bd:cHost + " *****")
+      LogFile(DToC(Date())+" "+Time()+"       " + hadoerror["cquery"])
+      LogFile(DToC(Date())+" "+Time()+"       " + hadoerror["ctitulo_mensaje"])
+      LogFile(DToC(Date())+" "+Time()+"       " + appdata:origen_bd:cLastError)
+      LogFile(DToC(Date())+" "+Time()+"       " + appdata:origen_bd:cInfoError)
+      LogFile(DToC(Date())+" "+Time()+"       " + appdata:origen_bd:cMsgError)
+      LogFile(DToC(Date())+" "+Time()+"*******")
+
+      return(.t.)
+
+   endif
+
+RETURN (.f.)
+
+//------------------------------------------------------------------------------
