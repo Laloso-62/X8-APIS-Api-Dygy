@@ -1,0 +1,197 @@
+/*
+ * Proyecto: Api-Rezta
+ * Fichero: f_Generales.prg
+ * Descripción:
+ * Autor:
+ * Fecha: 29/08/2022
+ */
+
+#include "Xailer.ch"
+#include "Digio.ch"
+
+//------------------------------------------------------------------------------
+
+FUNCTION valida_keys(hpaso)
+
+   LOCAL hestado:= {=>}, ckey:= ""
+
+   for each ckey in hpaso["akeys"]
+
+      * LogFile(DToC(Date())+" "+Time()+"   ******** validando keys especifica de funcion ckey = " +ckey + "    " + Str(seconds(),12,4))
+
+      if !hb_HHasKey( appdata:hreporte, ckey )
+
+         *LogFile(DToC(Date())+" "+Time()+"   ********           :(  key especifica de funcion faltante ckey = " +ckey + "    " + Str(seconds(),12,4))
+
+         inicializa_estructura_estado_peticion_api( @hestado )
+
+         hestado["cEstado"]                   := "Cancelado"
+         hestado["cDescripcion"]              := "Falta parametro " + ckey + " en archivo recibido con parametros"
+         hestado["cTituloTextoUsuario"]       := "El sistema ha detectado la falta de un parametro para responder a su peticion"
+         hestado["cTextoUsuario"]             := "Reporte este mensaje a su asesor de sistemas"
+
+         hpaso["cgraba"] += HB_JsonEncode( hestado )
+
+         hb_memowrit( appdata:hreporte["carchivo_error"], hpaso["cgraba"] )
+
+         LogFile(DToC(Date())+" "+Time()+"   ******** ocurrio un error en API-DYGY, en revision de parametros adicionales de "+appdata:cfile_json+"    "+Str(seconds(),12,4))
+         LogFile(DToC(Date())+" "+Time()+"   Falta parametro " + ckey + " en archivo recibido con parametros"
+         LogFile(DToC(Date())+" "+Time()+"   ********     "+Str(seconds(),12,4))
+
+         return(.f.)
+
+      endif
+
+   next
+
+RETURN (.t.)
+
+//------------------------------------------------------------------------------
+
+FUNCTION fectal(cesfecha)
+
+  local ameses:=array(13),cres,nesmes
+
+  if valtype(cesfecha)="D"
+    cres:=fechaammdd(cesfecha)
+  endif
+
+  if valtype(cesfecha)="C"
+    cres:=cesfecha
+  endif
+
+  ameses[01]="Enero"
+  ameses[02]="Febrero"
+  ameses[03]="Marzo"
+  ameses[04]="Abril"
+  ameses[05]="Mayo"
+  ameses[06]="Junio"
+  ameses[07]="Julio"
+  ameses[08]="Agosto"
+  ameses[09]="Septiembre"
+  ameses[10]="Octubre"
+  ameses[11]="Noviembre"
+  ameses[12]="Diciembre"
+  ameses[13]="???????"
+
+  nesmes:=val(subs(cres,4,2))
+  nesmes:=iif(nesmes<1 .or. nesmes>12,13,nesmes)
+
+  cres:=subs(cres,1,2)+" De "+ameses[nesmes]+" Del "+subs(cres,7,4)
+
+return (cres)
+
+//------------------------------------------------------------------------------
+
+FUNCTION fectac(cesfecha)
+
+  local ameses:=array(13),cres,nesmes
+
+  if valtype(cesfecha)="D"
+    cres:=dtoc(cesfecha)
+  endif
+
+  if valtype(cesfecha)="C"
+    cres:=cesfecha
+  endif
+
+  ameses[01]="Enero"
+  ameses[02]="Febrero"
+  ameses[03]="Marzo"
+  ameses[04]="Abril"
+  ameses[05]="Mayo"
+  ameses[06]="Junio"
+  ameses[07]="Julio"
+  ameses[08]="Agosto"
+  ameses[09]="Septiembre"
+  ameses[10]="Octubre"
+  ameses[11]="Noviembre"
+  ameses[12]="Diciembre"
+  ameses[13]="???????"
+
+  nesmes:=val(subs(cres,4,2))
+  nesmes:=iif(nesmes<1 .or. nesmes>12,13,nesmes)
+
+  cres:=subs(cres,1,2)+"/"+subs(ameses[nesmes],1,3)+"/"+subs(cres,7,4)
+
+return (cres)
+
+//------------------------------------------------------------------------------
+
+FUNCTION fechaammdd(cfecha, lconguiones)
+
+  LOCAL cres
+
+  if lconguiones=nil
+    lconguiones:=.f.
+  endif
+
+  if valtype(cfecha)="D"
+    cres:=dtoc(cfecha)
+  endif
+
+  if valtype(cfecha)="C"
+    cres:=cfecha
+  endif
+
+  cres:=subs(cres,7,4)+"/"+subs(cres,4,2)+"/"+subs(cres,1,2)
+
+  if lconguiones
+    cres:=strtran(cres,"/","-")
+  endif
+
+RETURN (cres)
+
+//------------------------------------------------------------------------------
+
+FUNCTION mensaje_avance(ctexto)
+
+   LOCAL hpaso:= {=>}
+
+   if Len(appdata:hestado) = 0
+
+      inicializa_estructura_estado_peticion_api( @appdata:hestado )
+
+      appdata:hestado["cEstado"]                   := "Proceso"
+      appdata:hestado["cDescripcion"]              := "seguimiento normal"
+      appdata:hestado["cTituloTextoUsuario"]       := "..."
+      appdata:hestado["cTextoUsuario"]             := "Peticion en Progreso..."
+
+   endif
+
+   appdata:hestado["cTituloTextoUsuario"]       := ctexto
+
+   hpaso["cgraba"] := HB_JsonEncode( appdata:hestado )
+
+   hb_memowrit( appdata:hreporte["carchivo_avances"], hpaso["cgraba"] )
+
+RETURN NIL
+
+//------------------------------------------------------------------------------
+
+FUNCTION borra_temporales()
+
+   if File(appdata:hreporte["carchivo_avances"])
+      FErase(appdata:hreporte["carchivo_avances"])
+   endif
+
+   if File(appdata:hreporte["carchivo_error"])
+      FErase(appdata:hreporte["carchivo_error"])
+   endif
+
+   if File(appdata:hreporte["carchivo_json"])
+      FErase(appdata:hreporte["carchivo_json"])
+   endif
+
+RETURN NIL
+
+//------------------------------------------------------------------------------
+
+FUNCTION crea_array( nrenglones, ncolumnas )
+
+   local ares:=Array(nrenglones, ncolumnas)
+
+RETURN (ares)
+
+//------------------------------------------------------------------------------
+

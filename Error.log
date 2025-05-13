@@ -1,0 +1,38 @@
+***************************** Registro de errores *****************************
+
+             Exe: X:\Xailer8\Api-Dygy\Api-Dygy.exe
+         Version: 1.0.0.0
+       User name: eduradohome
+   Computer name: DESKTOP-8COEV6S
+           Fecha: 04/12/2023
+            Hora: 20:05:47
+   Memoria libre: 2097151
+     Area actual: 1
+
+------------------------- Información del compilador --------------------------
+
+  Versión Xailer: Xailer 8.0.1
+      Compilador: Harbour 3.2.0dev (r1912031042)
+Compilador C/C++: MinGW GNU C 7.3 (32-bit)
+      Plataforma: Windows 10 10.0
+
+----------------------- Información detallada del error -----------------------
+
+      Subsistema: BASE
+ Código de error: 1132
+          Estado: .F.
+     Descripción: Bound error
+       Operación: array access
+      Argumentos:  [ 1] = Tipo: H Valor:  [ 2] = Tipo: N Valor: 2
+         Fichero: 
+ Código error SO: 0
+
+Pila de llamadas:
+  GENERA_NUEVO_EXCEL_CARTERA_CLIENTES_AUXILIAR_UN_CLIENTE (1974)
+  CONSULTA_CARTERA_CLIENTES_EXCEL (69)
+  PRINCIPAL:FORMSHOW (279)
+  PRINCIPAL:ONSHOW (0)
+  TSCROLLINGWINCONTROL:SHOW (663)
+  PRINCIPAL:SHOW (491)
+  MAIN (35)
+
