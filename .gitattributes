@@ -1,0 +1,8 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Configurar fin de linea con caracteres CR +LF para archivos PRG
+*.prg text eol=crlf
+*.xailer text eol=crlf
+
+

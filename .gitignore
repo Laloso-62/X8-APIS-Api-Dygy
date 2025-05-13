@@ -1,0 +1,15 @@
+# Archivos de compilacion .do
+*.do
+
+# archivos XML
+*.xml
+
+# archivos zip
+*.zip
+
+# archivos sql
+*.sql
+
+# archivos rar
+*.rar
+/Exceles
